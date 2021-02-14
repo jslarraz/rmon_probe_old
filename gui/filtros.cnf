@@ -1,5 +1,0 @@
-ARP_pkts|Admin|*|*|ARP|
-TCP_pkts|Admin|*|*|IP|*|*|TCP|*|*|
-UDP_pkts|Admin|*|*|IP|*|*|UDP|*|*|
-ICMP_pkts|Admin|*|*|IP|*|*|ICMP|*|*|
-HTTP_pkts_dst|Admin|*|*|IP|*|*|TCP|*|80|

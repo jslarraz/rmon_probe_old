@@ -215,16 +215,16 @@ class rmon_filter:
                             if name == status_name:
                                 # Si el gestor envia un 2, creo la fila y escribo un 3 (UnderCreation)
                                 if val == 2:
-                                    print "inserto un 3"
+                                    print ("inserto un 3")
                                     cursor.execute("INSERT INTO " + next_table + "(" + indice + ")" + " VALUES (" + suboid[11] + ")" )
                                     cursor.execute("UPDATE " + next_table + " SET " + name + " = 3 WHERE " + indice + " = %s", (suboid[11],) )
                                 # Si no es un 2, error
                                 else:
-                                    print "error"
+                                    print ("error")
                                     exito_resp = 0
                             # Si no es el campo EntryStatus, error
                             else:
-                                print "error"
+                                print ("error")
                                 exito_resp = 0
                         # Si existe, cogemos el valor y consideramos los diferentes casos
                         else:
@@ -234,31 +234,31 @@ class rmon_filter:
                                 if name == status_name:
                                     # Si el gestor envia un 1, no necesito hacer nada
                                     if val == 1:
-                                        print "No hago nada"
+                                        print ("No hago nada")
                                     # Si el gestor envia un 3, lo escribo
                                     elif val == 3:
-                                        print "Escribo un 3"
+                                        print ("Escribo un 3")
                                         cursor.execute("UPDATE " + next_table + " SET " + name + " = 3 WHERE " + indice + " = %s", (suboid[11],) )
                                         # Paramos el programa de filtrado
                                         if name == "channelStatus":
-                                            print "Pauso el filtro " + str(suboid[11])
+                                            print ("Pauso el filtro " + str(suboid[11]))
                                             self.filtro.delete(suboid[11])
                                     # Si el gestor envia un 4, borro la entrada
                                     elif val == 4:
-                                        print "Borro la entrada"
+                                        print ("Borro la entrada")
                                         cursor.execute("DELETE FROM " + next_table + " WHERE " + indice + " = %s", (suboid[11],) )
                                         # Paramos el programa de filtrado
                                         if name == "channelStatus":
-                                            print "Borro el filtro " + str(suboid[11])
+                                            print ("Borro el filtro " + str(suboid[11]))
                                             self.filtro.delete(suboid[11])
                                     # Si no es ninguno de los anteriores, error
                                     else:
-                                        print "error"
+                                        print ("error")
                                         exito_resp = 0
                                 # Si no es el campo EntryStatus, error
                                 else:
-				    exito_resp = 0
-                                    print "error"
+                                    exito_resp = 0
+                                    print ("error")
 
                             elif str(status_val) == "3":
                                 if name == status_name:
@@ -267,28 +267,28 @@ class rmon_filter:
                                         cursor.execute("UPDATE " + next_table + " SET " + name + " = 1 WHERE " + indice + " = %s", (suboid[11],) )
                                         # Ejecutamos el programa de filtrado
                                         if name == "channelStatus":
-                                            print "Lanzo el filtro " + str(suboid[11])
+                                            print ("Lanzo el filtro " + str(suboid[11]))
                                             self.filtro.add(suboid[11])
                                     # Si el gestor envia un 3, no necesito hacer nada
                                     elif val == 3:
-                                        print "No hago nada"                          
+                                        print ("No hago nada")
                                     # Si el gestor envia un 4, borro la entrada
                                     elif val == 4:
-                                        print "Borro la entrada"
+                                        print ("Borro la entrada")
                                         cursor.execute("DELETE FROM " + next_table + " WHERE " + indice + " = %s", (suboid[11],) )
                                     # Si no es ninguno de los anteriores, error
                                     else:
-                                        print "error"
+                                        print ("error")
                                         exito_resp = 0 
                                 # Si no es el campo EntryStatus, lo escribo
                                 else:
                                     # !!!!!!!!!!! CUIDADO CON EL TIPO DE DATOS QUE INTRODUCZCO 
-				    if tools.isType(val, type2_resp):
-                                        print "escribo el valor recibido"
+                                    if tools.isType(val, type2_resp):
+                                        print ("escribo el valor recibido")
                                         cursor.execute("UPDATE " + next_table + " SET " + name + " = \'" + str(val) + "\' WHERE " + indice + " = %s", (suboid[11],) )
-				    else:
-					print "El tipo introducido no coincide con el de la mib"
-					exito_resp = 0
+                                    else:
+                                        print ("El tipo introducido no coincide con el de la mib")
+                                        exito_resp = 0
 
                     else:
                         # No permiso de escritura

@@ -10,63 +10,63 @@ class filter:
     ######################
     
     def __init__(self, N_FILTROS, BBDD):
-	# Creamos las variables
-	self.N_FILTROS = N_FILTROS
-	self.BBDD = BBDD
-	self.matches = Array('i', [0]*self.N_FILTROS)
-	self.process = [0]*self.N_FILTROS
-	self.indices = [0]*self.N_FILTROS
+        # Creamos las variables
+        self.N_FILTROS = N_FILTROS
+        self.BBDD = BBDD
+        self.matches = Array('i', [0]*self.N_FILTROS)
+        self.process = [0]*self.N_FILTROS
+        self.indices = [0]*self.N_FILTROS
 
 
     def start(self):
-	# Cargamos los filtros
+        # Cargamos los filtros
         db_rmon=MySQLdb.connect(host=self.BBDD.ADDR,user=self.BBDD.USER,passwd=self.BBDD.PASS, db="rmon")
         db_rmon.autocommit(True)
         cursor = db_rmon.cursor()
 
-	cursor.execute("SELECT channelIndex FROM td_channelEntry WHERE channelStatus = \'1\'" )
-	result = cursor.fetchall()
-	if str(result) != "None":
-    	    for canal in result:
-		# Comprobamos que hay sitio en la memoria compartida
-		self.ind = self.busca_memoria()
-		if self.ind != None:
-            	    status, match, interfaz, filtro = self.genera_filtro(str(canal[0]))
-            	    if status == 1:
-			self.indices[self.ind] = canal[0]
-			self.matches[self.ind] = match
-                	self.process[self.ind] = Process(target=self.captura, args=(interfaz, filtro))  
+        cursor.execute("SELECT channelIndex FROM td_channelEntry WHERE channelStatus = \'1\'" )
+        result = cursor.fetchall()
+        if str(result) != "None":
+            for canal in result:
+                # Comprobamos que hay sitio en la memoria compartida
+                self.ind = self.busca_memoria()
+                if self.ind != None:
+                    status, match, interfaz, filtro = self.genera_filtro(str(canal[0]))
+                    if status == 1:
+                        self.indices[self.ind] = canal[0]
+                        self.matches[self.ind] = match
+                        self.process[self.ind] = Process(target=self.captura, args=(interfaz, filtro))
                         self.process[self.ind].start()
 
                     else:
-                        print "Formato de filtro erroneo"
+                        print("Formato de filtro erroneo")
 
-		else:
-	    	    print "No hay espacio en memoria para el filtro"
+                else:
+                    print("No hay espacio en memoria para el filtro")
 
-	else:
-            print "No hay ningun filtro declarado"
+        else:
+            print("No hay ningun filtro declarado")
 
 
 
 
 
     def add(self, index):
-	self.ind = self.busca_memoria()
-	if self.ind != None:
+        self.ind = self.busca_memoria()
+        if self.ind != None:
             status, match, interfaz, filtro = self.genera_filtro(str(index))
             if status == 1:
-		self.indices[self.ind] = int(index)
-		self.matches[self.ind] = match
+                self.indices[self.ind] = int(index)
+                self.matches[self.ind] = match
                 self.process[self.ind] = Process(target=self.captura, args=(interfaz, filtro))
                 self.process[self.ind].start()
-                print filtro
+                print(filtro)
 
             else:
-                print "Formato de filtro erroneo"
+                print("Formato de filtro erroneo")
 
-	else:
-	    print "No hay espacio en memoria para el filtro"
+        else:
+            print("No hay espacio en memoria para el filtro")
 
 
     def delete(self, index):
@@ -76,18 +76,18 @@ class filter:
             if self.indices[i] == int(index):
                 ind = i
 
-        if ind != None:    
-            self.indices[ind] = 0
-            self.matches[ind] = 0
-            self.process[ind].terminate()
+                if ind != None:
+                    self.indices[ind] = 0
+                    self.matches[ind] = 0
+                    self.process[ind].terminate()
 
-        else:
-            print "El filto no existia"
+                else:
+                    print("El filto no existia")
 
 
     def kill(self):
         for i in range(len(self.indices)):
-            if indices[i] != 0:
+            if self.indices[i] != 0:
                 self.process[i].terminate()
 
 
@@ -146,7 +146,7 @@ class filter:
                 interfaz = interfaz[1]
             except:
                 status = 0
-                print "Error al conseguir el interfaz"
+                print("Error al conseguir el interfaz")
 
             cursor.execute("SELECT * FROM td_filterEntry WHERE filterChannelIndex = %s and filterStatus = \'1\'", (index,) )
             result = cursor.fetchall()
@@ -214,15 +214,15 @@ class filter:
 
                 else:
                     status = 0
-                    print "channelAcceptType no valido"
+                    print("channelAcceptType no valido")
                                                
             else:
                 status = 0
-                print "No hay ningun filtro configurado"
+                print("No hay ningun filtro configurado")
 
         else:
             status = 0
-            print "Error al acceder a la base de datos 1"
+            print("Error al acceder a la base de datos 1")
 
         return status, channelMatches, interfaz, filtro
 
@@ -234,7 +234,7 @@ class filter:
         
     def captura(self, interfaz, filtro):  
 #        sniff(iface=interfaz, filter=filtro, prn=self.callback)
-	pc = pcap.pcapObject()
-	pc.open_live(interfaz, 1, True, 1000)
-	pc.setfilter(filtro, True, 0)
-	pc.loop(-1, self.callback)
+        pc = pcap.pcapObject()
+        pc.open_live(interfaz, 1, True, 1000)
+        pc.setfilter(filtro, True, 0)
+        pc.loop(-1, self.callback)

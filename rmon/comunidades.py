@@ -98,8 +98,8 @@ class comunidades:
 
         # Si el oid es menor que nuestra raid
         if tools.menor_que(oid, '1.3.6.1.4.1.28308.1.0'):
-	    oid = "1.3.6.1.4.1.28308.1.0"
-	    if self.permiso(comunidad, oid) == 1 or self.permiso(comunidad, oid) == 3:
+            oid = "1.3.6.1.4.1.28308.1.0"
+            if self.permiso(comunidad, oid) == 1 or self.permiso(comunidad, oid) == 3:
                 suboid = ['1','3','6','1','4','1','28308','1','0']
                 oid_resp = '.'.join(suboid)
                 exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.get(oid_resp)                                             
@@ -119,7 +119,7 @@ class comunidades:
             if len(suboid) < 12:
                 suboid = suboid + ['0']
 
-	    # Conexion a la base de datos
+            # Conexion a la base de datos
             db_comunidades=MySQLdb.connect(host=self.BBDD.ADDR,user=self.BBDD.USER,passwd=self.BBDD.PASS, db="comunidades")
             db_comunidades.autocommit(True)
             cursor = db_comunidades.cursor()
@@ -228,7 +228,7 @@ class comunidades:
                 next_table = result[0]
 
                 if str(next_table) == 'nextTable':
-                    print "Escribo en master"
+                    print("Escribo en master")
                     cursor.execute("UPDATE ts_comunidades SET value = \'" + str(val) + "\' WHERE orden = %s", (suboid[7],) )
                 else:             
                     cursor.execute("SELECT name, next_table, indices, type_value, access FROM " + next_table + " WHERE orden = %s", (suboid[9],) )
@@ -265,16 +265,16 @@ class comunidades:
                                 if name == status_name:
                                     # Si el gestor envia un 2, creo la fila y escribo un 3 (UnderCreation)
                                     if str(val) == "2":
-                                        print "inserto un 3"
+                                        print("inserto un 3")
                                         cursor.execute("INSERT INTO " + next_table + "(communityIndex, communityName, id)" + " VALUES (\'" + str(pKey) + "\',\'" + str(cname) + "\'," + str(sKey) + ")" )
                                         cursor.execute("UPDATE " + next_table + " SET " + name + " = 3 WHERE communityIndex = %s and id = %s", (pKey,sKey,) )
                                     # Si no es un 2, error
                                     else:
-                                        print "error"
+                                        print("error")
                                         exito_resp = 0
                                 # Si no es el campo EntryStatus, error
                                 else:
-                                    print "error"
+                                    print("error")
                                     exito_resp = 0
                             # Si existe, cogemos el valor y consideramos los diferentes casos
                             else:
@@ -284,49 +284,49 @@ class comunidades:
                                     if name == status_name:
                                         # Si el gestor envia un 1, no necesito hacer nada
                                         if val == 1:
-                                            print "No hago nada"
+                                            print("No hago nada")
                                         # Si el gestor envia un 3, lo escribo
                                         elif val == 3:
-                                            print "Escribo un 3"
+                                            print("Escribo un 3")
                                             cursor.execute("UPDATE " + next_table + " SET " + name + " = 3 WHERE communityIndex = %s and id = %s", (pKey,sKey,) )
                                         # Si el gestor envia un 4, borro la entrada
                                         elif val == 4:
-                                            print "Borro la entrada"
+                                            print("Borro la entrada")
                                             cursor.execute("DELETE FROM " + next_table + " WHERE communityIndex = %s and id = %s", (pKey,sKey,) )
                                         # Si no es ninguno de los anteriores, error
                                         else:
-                                            print "error"
+                                            print("error")
                                             exito_resp = 0
                                     # Si no es el campo EntryStatus, error
                                     else:
-                                        print "error"
+                                        print("error")
 
                                 elif str(status_val) == "3":
                                     if name == status_name:
                                         # Si el gestor envia un 1, lo escribo y ejecuto el programa de captura
                                         if val == 1:
-                                            print "Escribo un 1 y ejecuto el programa captura"
+                                            print("Escribo un 1 y ejecuto el programa captura")
                                             cursor.execute("UPDATE " + next_table + " SET " + name + " = 1 WHERE communityIndex = %s and id = %s", (pKey,sKey,) )
                                         # Si el gestor envia un 3, no necesito hacer nada
                                         elif val == 3:
-                                            print "No hago nada"                          
+                                            print("No hago nada")
                                         # Si el gestor envia un 4, borro la entrada
                                         elif val == 4:
-                                            print "Borro la entrada"
+                                            print("Borro la entrada")
                                             cursor.execute("DELETE FROM " + next_table + " WHERE communityIndex = %s and id = %s", (pKey,sKey,) )
                                         # Si no es ninguno de los anteriores, error
                                         else:
-                                            print "error"
+                                            print("error")
                                             exito_resp = 0 
                                     # Si no es el campo EntryStatus, lo escribo
                                     else:
                                         # !!!!!!!!!!! CUIDADO CON EL TIPO DE DATOS QUE INTRODUCZCO 
-					if tools.isType(val, type2_resp):
-                                            print "escribo el valor recibido"
+                                        if tools.isType(val, type2_resp):
+                                            print("escribo el valor recibido")
                                             cursor.execute("UPDATE " + next_table + " SET " + name + " = \'" + str(val) + "\' WHERE communityIndex = %s and id = %s", (pKey,sKey,) )
-					else:
-					    print "El tipo introducido no coincide con el de la mib"
-					    exito_resp = 0
+                                        else:
+                                            print("El tipo introducido no coincide con el de la mib")
+                                            exito_resp = 0
 
                         else:
                             # No permiso de escritura
@@ -414,8 +414,8 @@ class comunidades:
         coincidencias = 0
         suboid = str(oid).split('.')
 
-	if suboid[0] == "":
-	    suboid = suboid[1:len(suboid)]
+        if suboid[0] == "":
+            suboid = suboid[1:len(suboid)]
 
         # Si que es de mi arbol, asi que curso la peticion // !!En cada consulta capturar errores(not exist)
         # Conexion a la base de datos
@@ -426,7 +426,7 @@ class comunidades:
         cursor.execute("SELECT value FROM ts_comunidades WHERE orden = 1" )
         result = cursor.fetchone()
         master = result[0]
-        if (comunidad == master) and (suboid[0:7] == ['1', '3', '6', '1', '4', '1', '28308']):
+        if (str(comunidad) == master) and (suboid[0:7] == ['1', '3', '6', '1', '4', '1', '28308']):
             permisos = 3
 
         else:          
@@ -439,8 +439,8 @@ class comunidades:
                     oid_entrada = str(entrada[4])
                     suboid_entrada = oid_entrada.split('.')
 
-	            if suboid_entrada[0] == "":
-	   	        suboid_entrada = suboid_entrada[1:len(suboid_entrada)]
+                    if suboid_entrada[0] == "":
+                           suboid_entrada = suboid_entrada[1:len(suboid_entrada)]
 
                     if suboid_entrada == suboid[0:len(suboid_entrada)]:
                         if len(suboid_entrada) > coincidencias:

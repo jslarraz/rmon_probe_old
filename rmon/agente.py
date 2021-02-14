@@ -15,11 +15,11 @@ class agente:
 
     # Funcion de inicializacion
     def __init__(self): 
-	global value
-	value = 0
+        global value
+        value = 0
      
         # Decimos agente ON
-        print "SNMP Service ON"
+        print("SNMP Service ON")
 
         # Leemos las opciones del fichero de configuracion
         fd = open("/etc/rmon/rmon.conf")
@@ -43,41 +43,41 @@ class agente:
                 elif substr[0] == "N_FILTROS":
                     self.N_FILTROS = int(substr[1])
                 else:
-                    print "Error al leer datos de configuracion"
+                    print("Error al leer datos de configuracion")
 
             line = fd.readline()
 
         fd.close()
 
         # Comprobamos que existe la base de datos
-	self.miBBDD = tools.BBDD(self.BBDD_ADDR, self.BBDD_USER, self.BBDD_PASS)
-	connection = MySQLdb.connect(host = self.BBDD_ADDR, user = self.BBDD_USER, passwd = self.BBDD_PASS)
-	cursor = connection.cursor()
-	cursor.execute("SHOW DATABASES;")
-	databases = cursor.fetchall()
-	
-	if not('rmon' in str(databases)):
-	    statement = ""
-	    for line in open('/etc/rmon/mysql_config.sql'):
-		if re.match(r'--', line):
-		    continue
-		if not re.search(r'[^-;]+;', line):
-		    statement = statement + line
-		else:
-		    statement = statement + line
-		    try:
-			cursor.execute(statement)
-		    except:
-			print "incorrect statement"
-		    statement = ""
-		   
-	
-	# Creamos la instancia de la mib
+        self.miBBDD = tools.BBDD(self.BBDD_ADDR, self.BBDD_USER, self.BBDD_PASS)
+        connection = MySQLdb.connect(host = self.BBDD_ADDR, user = self.BBDD_USER, passwd = self.BBDD_PASS)
+        cursor = connection.cursor()
+        cursor.execute("SHOW DATABASES;")
+        databases = cursor.fetchall()
+        
+        if not('rmon' in str(databases)):
+            statement = ""
+            for line in open('/etc/rmon/mysql_config.sql'):
+                if re.match(r'--', line):
+                    continue
+                if not re.search(r'[^-;]+;', line):
+                    statement = statement + line
+                else:
+                    statement = statement + line
+                    try:
+                        cursor.execute(statement)
+                    except:
+                        print("incorrect statement")
+                    statement = ""
+                   
+        
+        # Creamos la instancia de la mib
         self.mib = mib.mib(self.N_FILTROS, self.miBBDD)
-	
-	# Configuramos la alarma
-	signal.signal(signal.SIGALRM, self.update)
-	signal.alarm(10)
+        
+        # Configuramos la alarma
+        signal.signal(signal.SIGALRM, self.update)
+        signal.alarm(10)
 
         # Creamos el agente
         self.transportDispatcher = AsynsockDispatcher()
@@ -97,8 +97,8 @@ class agente:
 
 
     def update(self, signum, frame):
-	self.mib.rmon_filter.filtro.update()
-	signal.alarm(10)
+        self.mib.rmon_filter.filtro.update()
+        signal.alarm(10)
 
 
     # Comenzamos a procesar las peticiones
@@ -116,7 +116,7 @@ class agente:
             reqMsg, wholeMsg = decoder.decode(
                 wholeMsg, asn1Spec=pMod.Message(),
                 )
-	                
+                        
             # Definimos el mensaje de respuesta y extraemos el PDU del mensaje
             rspMsg = pMod.apiMessage.getResponse(reqMsg)
             rspPDU = pMod.apiMessage.getPDU(rspMsg)
@@ -127,10 +127,10 @@ class agente:
             
             # GETNEXT PDU
             if reqPDU.isSameTypeWith(pMod.GetNextRequestPDU()):
-                for oid, val in pMod.apiPDU.getVarBinds(reqPDU):		    		    
+                for oid, val in pMod.apiPDU.getVarBinds(reqPDU):                                        
                     errorIndex = errorIndex + 1
                     exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.mib.getnext(oid, comunidad)
-		    if exito_resp == 1:
+                    if exito_resp == 1:
                         # Tenemos la respuesta
                         varBinds = tools.formato(varBinds, oid_resp, val_resp, type2_resp, msgVer)
                     else:

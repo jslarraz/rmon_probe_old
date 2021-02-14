@@ -56,7 +56,7 @@ def formato(varBinds, oid_resp, val_resp, type2_resp, msgVer):
     elif type2_resp == "OctetString":
         varBinds.append((oid_resp, api.protoModules[msgVer].OctetString(str(val_resp))))
     elif type2_resp == "OID":
-        varBinds.append((oid_resp, api.protoModules[msgVer].ObjectIdentifier(str(val_resp))))	
+        varBinds.append((oid_resp, api.protoModules[msgVer].ObjectIdentifier(str(val_resp))))        
     else:
         varBinds.append((oid_resp, api.protoModules[msgVer].OctetString(str(val_resp))))  
 
@@ -70,10 +70,10 @@ class BBDD:
 
 def isINTEGER(val):
     try:
-	int(val)
-	return True
+        int(val)
+        return True
     except:
-	return False
+        return False
 
 def isTimeTicks(val):
     if isinstance(val, int):
@@ -113,36 +113,36 @@ def isType(val, tipo):
 
 
 
-
-
-def permiso(self, comunidad, oid):
-    permisos = 0
-    coincidencias = 0
-    suboid = str(oid).split('.')
-
-    # Si que es de mi arbol, asi que curso la peticion // !!En cada consulta capturar errores(not exist)
-    # Conexion a la base de datos
-    db=MySQLdb.connect(host="localhost",user="root",passwd="AquaDarknes",db="comunidades")
-    cursor = db.cursor()
-
-    cursor.execute("SELECT value FROM ts_comunidades WHERE orden = 1" )
-    result = cursor.fetchone()
-    master = result[0]
-    if (comunidad == master) and (suboid[0:7] == ['1', '3', '6', '1', '4', '1', '28308']):
-        permisos = 3
-
-    else:          
-        cursor.execute("SELECT * FROM td_communityManagement WHERE communityName = %s", (comunidad,) )
-        result = cursor.fetchall()
-        if str(result) != "None":
-            for entrada in result:
-                permisos_entrada = int(entrada[3])
-                oid_entrada = str(entrada[4])
-                suboid_entrada = oid_entrada.split('.')
-                if suboid_entrada == suboid[0:len(suboid_entrada)]:
-                    if len(suboid_entrada) > coincidencias:
-                        coincidencias = len(suboid_entrada)
-                        permisos = permisos_entrada
-
-    return permisos  
-
+#
+#
+# def permiso(self, comunidad, oid):
+#     permisos = 0
+#     coincidencias = 0
+#     suboid = str(oid).split('.')
+#
+#     # Si que es de mi arbol, asi que curso la peticion // !!En cada consulta capturar errores(not exist)
+#     # Conexion a la base de datos
+#     db=MySQLdb.connect(host="localhost",user="root",passwd="AquaDarknes",db="comunidades")
+#     cursor = db.cursor()
+#
+#     cursor.execute("SELECT value FROM ts_comunidades WHERE orden = 1" )
+#     result = cursor.fetchone()
+#     master = result[0]
+#     if (comunidad == master) and (suboid[0:7] == ['1', '3', '6', '1', '4', '1', '28308']):
+#         permisos = 3
+#
+#     else:
+#         cursor.execute("SELECT * FROM td_communityManagement WHERE communityName = %s", (comunidad,) )
+#         result = cursor.fetchall()
+#         if str(result) != "None":
+#             for entrada in result:
+#                 permisos_entrada = int(entrada[3])
+#                 oid_entrada = str(entrada[4])
+#                 suboid_entrada = oid_entrada.split('.')
+#                 if suboid_entrada == suboid[0:len(suboid_entrada)]:
+#                     if len(suboid_entrada) > coincidencias:
+#                         coincidencias = len(suboid_entrada)
+#                         permisos = permisos_entrada
+#
+#     return permisos
+#

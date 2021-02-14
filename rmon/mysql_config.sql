@@ -121,5 +121,5 @@ CREATE TABLE td_communityManagement ( communityIndex TEXT, communityName TEXT, i
 
 -- Creamos los usuarios con permiso de acceso remoto
 
-GRANT ALL ON rmon.* TO 'admin'@'%' IDENTIFIED BY 'admin';
-GRANT ALL ON comunidades.* TO 'admin'@'%' IDENTIFIED BY 'admin';
+GRANT ALL ON rmon.* TO 'rmon'@'localhost' IDENTIFIED BY 'rmon';
+GRANT ALL ON comunidades.* TO 'rmon'@'localhost' IDENTIFIED BY 'rmon';
