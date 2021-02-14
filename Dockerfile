@@ -28,6 +28,7 @@ RUN /usr/bin/mysqld_safe & \
 
 # Install NetSNMP rmon and manager
 RUN apt-get -y install snmpd
+RUN apt-get -y install snmp
 
 # Change snmp default port
 RUN sed -i -e"s/^agentAddress\s*udp:127.0.0.1:161/agentAddress  udp:127.0.0.1:162/" /etc/snmp/snmpd.conf

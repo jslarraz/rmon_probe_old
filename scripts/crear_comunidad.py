@@ -5,7 +5,7 @@ import sys
 ip_addr = "192.168.1.200"
 
 # Comunidad
-community = "admin"
+community = "jorge"
 
 
 
