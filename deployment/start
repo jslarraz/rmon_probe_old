@@ -1,7 +1,0 @@
-#!/bin/bash
-sh /usr/bin/mysqld_safe &
-sleep 10
-mysql -u admin -p --password=admin -h localhost < /tmp/mysql_config
-mysql --user='rmon' --password='rmon' --execute='SHOW DATABASES;'
-python /etc/rmon/start.py
-

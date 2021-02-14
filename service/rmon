@@ -9,44 +9,44 @@
 ### END INIT INFO
 
 if [ "$1" = "start" ]; then
-	status=$(ps aux | grep /etc/rmon/ | grep -v grep | awk '{print $2}')
-        if [ "$status" != "" ]; then
-        	echo "rmon already started"
-        else
-                echo "starting rmon service..."
-                python /etc/rmon/start.py &> /dev/null &
-        fi
+    status=$(ps aux | grep /etc/rmon/ | grep -v grep | awk '{print $2}')
+    if [ "$status" != "" ]; then
+        echo "rmon already started"
+    else
+        echo "starting rmon service..."
+        python /etc/rmon/start.py &> /dev/null &
+    fi
 
 
 elif [ "$1" = "stop" ]; then
-        echo "stopping rmon service..."
-        filtros=$(ps aux | grep /etc/rmon/ | grep -v grep | awk '{print $2}')
-	IFS=$' '
-	for i in $filtros; do a=$i; done
-	IFS=$'\n' 
-	for PID in $a; do kill -9 $PID; done
-	unset IFS
+    echo "stopping rmon service..."
+    filtros=$(ps aux | grep /etc/rmon/ | grep -v grep | awk '{print $2}')
+    IFS=$' '
+    for i in $filtros; do a=$i; done
+    IFS=$'\n'
+    for PID in $a; do kill -9 $PID; done
+    unset IFS
 
 elif [ "$1" = "restart" ]; then
-	echo "restarting rmon service..."
-        filtros=$(ps aux | grep /etc/rmon/ | grep -v grep | awk '{print $2}')
-	IFS=$' '
-	for i in $filtros; do a=$i; done
-	IFS=$'\n' 
-	for PID in $a; do kill -9 $PID; done
-	unset IFS
+    echo "restarting rmon service..."
+    filtros=$(ps aux | grep /etc/rmon/ | grep -v grep | awk '{print $2}')
+    IFS=$' '
+    for i in $filtros; do a=$i; done
+    IFS=$'\n'
+    for PID in $a; do kill -9 $PID; done
+    unset IFS
 
-        python /etc/rmon/start.py &> /dev/null &
+    python /etc/rmon/start.py &> /dev/null &
 
 elif [ "$1" = "status" ]; then
-	status=$(ps aux | grep /etc/rmon/ | grep -v grep | awk '{print $2}')
-	if [ "$status" != "" ]; then
-		echo "running..."
-	else
-		echo "stopped"
-	fi
+    status=$(ps aux | grep /etc/rmon/ | grep -v grep | awk '{print $2}')
+    if [ "$status" != "" ]; then
+        echo "running..."
+    else
+        echo "stopped"
+    fi
 
 else
-	echo "Usage /etc/init.d/rmon start|stop|restart|status"
+    echo "Usage /etc/init.d/rmon start|stop|restart|status"
 
 fi
