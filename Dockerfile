@@ -32,7 +32,7 @@ RUN apt-get -y install snmp
 
 # Change snmp default port
 RUN sed -i -e"s/^agentAddress\s*udp:127.0.0.1:161/agentAddress  udp:127.0.0.1:162/" /etc/snmp/snmpd.conf
-
+RUN sed -i -e"s/^view\s*systemonly\s*included\s*.1.3.6.1.2.1.1/view systemonly included .1.3.6.1.2.1/" /etc/snmp/snmpd.conf
 
 # Install and configure supervisor
 RUN apt-get -y install supervisor
@@ -42,7 +42,8 @@ ADD supervisor.conf /etc/supervisor.conf
 RUN apt-get -y install gcc
 RUN apt-get -y install tcpdump
 RUN apt-get -y install libpcap-dev
-RUN ln /usr/lib/x86_64-linux-gnu/libpcap.so.0.8 /usr/lib/x86_64-linux-gnu/libpcap.so.1
+#RUN ln /usr/lib/x86_64-linux-gnu/libpcap.so.0.8 /usr/lib/x86_64-linux-gnu/libpcap.so.1
+RUN apt-get -y install python-libpcap
 
 RUN apt-get -y install python
 RUN apt-get -y install python-pip

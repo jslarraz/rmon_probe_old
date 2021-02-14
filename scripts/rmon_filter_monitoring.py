@@ -3,41 +3,42 @@ import subprocess
 import sys
 
 # Direccion IP
-ip_addr = ""
+ip_addr = "192.168.1.200"
 
 # Interface
-oid_interface = ""
+interface_name = "eth0"
 
 # Comunidad
-community = ""
+community = "jorge"
 
 # Numero de filtros
-n = int(sys.argv[1])
+n = 32
 
-##########################
-# Creamos la comunidad   #
-##########################
 
-#subprocess.call(["snmpset", "-v", "1", "-c", "admin", ip_addr, "1.3.6.1.4.1.28308.2.1.6.\'"+community+"\'.1", "i", "2"])
+#################################
+# Buscamos el OID del interface #
+#################################
 
-#subprocess.call(["snmpset", "-v", "1", "-c", "admin", ip_addr, "1.3.6.1.4.1.28308.2.1.4.\'"+community+"\'.1", "i", "3"])
+oid_interface = None
+r = subprocess.check_output(["snmpwalk", "-v", "1", "-c", community, ip_addr, "1.3.6.1.2.1.2.2.1.2"])
+for line in str(r).split('\\n'):
+	if interface_name in line:
+		oid_interface = line.split('=')[0].split('.')[-1]
+		try:
+			oid_interface = str(int(oid_interface))
+		except:
+			exit(0)
 
-#subprocess.call(["snmpset", "-v", "1", "-c", "admin", ip_addr, "1.3.6.1.4.1.28308.2.1.5.\'"+community+"\'.1", "s", "1.3"])
-
-#subprocess.call(["snmpset", "-v", "1", "-c", "admin", ip_addr, "1.3.6.1.4.1.28308.2.1.6.\'"+community+"\'.1", "i", "1"])
-
+if oid_interface == None:
+	exit(0)
 
 ##########################
 # Insertamos los filtros #
 ##########################
 
-#proto=['0806','06','11','01','0050','01BB','0035','0015','0016','0019','006E','007B','0089','008A','008B','008F','00A1','0D3D','0050','01BB','0035','0015','0016','0019','006E','007B','0089','008A','008B','008F','00A1','0D3D']
-#texto=['ARP_pkts','TCP_pkts','UDP_pkts','ICMP_pkts','HTTP_pkts_dst','HTTPS_pkts_dst','DNS_pkts_dst','FTP21_pkts_dst','SSH_pkts_dst','SMTP_pkts_dst','POP3_pkts_dst','NTP_pkts_dst','NETBIOS137_pkts_dst','NETBIOS138_pkts_dst','NETBIOS139_pkts_dst','IMAP_pkts_dst','SNMP_pkts_dst','RDESKTOP_pkts_dst','HTTP_pkts_ori','HTTPS_pkts_ori','DNS_pkts_ori','FTP21_pkts_ori','SSH_pkts_ori','SMTP_pkts_ori','POP3_pkts_ori','NTP_pkts_ori','NETBIOS137_pkts_ori','NETBIOS138_pkts_ori', 'NETBIOS139_pkts_ori','IMAP_pkts_ori','SNMP_pkts_ori','RDESKTOP_pkts_ori']
-#offset=['12']*1 + ['23']*3 + ['36']*14 + ['34']*14 
-
-proto=['1680','06','11','01','0050','01BB','0035','0015','0016','0019','006E','007B','0089','008A','008B','008F','00A1','0D3D','0050','01BB','0035','0015','0016','0019','006E','007B','0089','008A','008B','008F','00A1','0D3D']
-texto=['IPERF','TCP_pkts','UDP_pkts','ICMP_pkts','HTTP_pkts_dst','HTTPS_pkts_dst','DNS_pkts_dst','FTP21_pkts_dst','SSH_pkts_dst','SMTP_pkts_dst','POP3_pkts_dst','NTP_pkts_dst','NETBIOS137_pkts_dst','NETBIOS138_pkts_dst','NETBIOS139_pkts_dst','IMAP_pkts_dst','SNMP_pkts_dst','RDESKTOP_pkts_dst','HTTP_pkts_ori','HTTPS_pkts_ori','DNS_pkts_ori','FTP21_pkts_ori','SSH_pkts_ori','SMTP_pkts_ori','POP3_pkts_ori','NTP_pkts_ori','NETBIOS137_pkts_ori','NETBIOS138_pkts_ori', 'NETBIOS139_pkts_ori','IMAP_pkts_ori','SNMP_pkts_ori','RDESKTOP_pkts_ori']
-offset=['36']*1 + ['23']*3 + ['36']*14 + ['34']*14 
+proto=['0806','06','11','01','0050','01BB','0035','0015','0016','0019','006E','007B','0089','008A','008B','008F','00A1','0D3D','0050','01BB','0035','0015','0016','0019','006E','007B','0089','008A','008B','008F','00A1','0D3D']
+texto=['ARP_pkts','TCP_pkts','UDP_pkts','ICMP_pkts','HTTP_pkts_dst','HTTPS_pkts_dst','DNS_pkts_dst','FTP21_pkts_dst','SSH_pkts_dst','SMTP_pkts_dst','POP3_pkts_dst','NTP_pkts_dst','NETBIOS137_pkts_dst','NETBIOS138_pkts_dst','NETBIOS139_pkts_dst','IMAP_pkts_dst','SNMP_pkts_dst','RDESKTOP_pkts_dst','HTTP_pkts_ori','HTTPS_pkts_ori','DNS_pkts_ori','FTP21_pkts_ori','SSH_pkts_ori','SMTP_pkts_ori','POP3_pkts_ori','NTP_pkts_ori','NETBIOS137_pkts_ori','NETBIOS138_pkts_ori', 'NETBIOS139_pkts_ori','IMAP_pkts_ori','SNMP_pkts_ori','RDESKTOP_pkts_ori']
+offset=['12']*1 + ['23']*3 + ['36']*14 + ['34']*14
 
 #for i in range(len(proto)):	
 for i in range(n):
