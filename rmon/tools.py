@@ -112,37 +112,3 @@ def isType(val, tipo):
         return isSTRING(val)
 
 
-
-#
-#
-# def permiso(self, comunidad, oid):
-#     permisos = 0
-#     coincidencias = 0
-#     suboid = str(oid).split('.')
-#
-#     # Si que es de mi arbol, asi que curso la peticion // !!En cada consulta capturar errores(not exist)
-#     # Conexion a la base de datos
-#     db=MySQLdb.connect(host="localhost",user="root",passwd="AquaDarknes",db="comunidades")
-#     cursor = db.cursor()
-#
-#     cursor.execute("SELECT value FROM ts_comunidades WHERE orden = 1" )
-#     result = cursor.fetchone()
-#     master = result[0]
-#     if (comunidad == master) and (suboid[0:7] == ['1', '3', '6', '1', '4', '1', '28308']):
-#         permisos = 3
-#
-#     else:
-#         cursor.execute("SELECT * FROM td_communityManagement WHERE communityName = %s", (comunidad,) )
-#         result = cursor.fetchall()
-#         if str(result) != "None":
-#             for entrada in result:
-#                 permisos_entrada = int(entrada[3])
-#                 oid_entrada = str(entrada[4])
-#                 suboid_entrada = oid_entrada.split('.')
-#                 if suboid_entrada == suboid[0:len(suboid_entrada)]:
-#                     if len(suboid_entrada) > coincidencias:
-#                         coincidencias = len(suboid_entrada)
-#                         permisos = permisos_entrada
-#
-#     return permisos
-#

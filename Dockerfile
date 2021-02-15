@@ -34,11 +34,9 @@ RUN apt-get -y install snmp
 RUN sed -i -e"s/^agentAddress\s*udp:127.0.0.1:161/agentAddress  udp:127.0.0.1:162/" /etc/snmp/snmpd.conf
 RUN sed -i -e"s/^view\s*systemonly\s*included\s*.1.3.6.1.2.1.1/view systemonly included .1.3.6.1.2.1/" /etc/snmp/snmpd.conf
 
-# Install and configure supervisor
-RUN apt-get -y install supervisor
-ADD supervisor.conf /etc/supervisor.conf
 
 # Install dependencies for RMON
+RUN apt-get -y install procps
 RUN apt-get -y install gcc
 RUN apt-get -y install tcpdump
 RUN apt-get -y install libpcap-dev
@@ -60,4 +58,4 @@ RUN cp service/rmon /etc/init.d/rmon
 EXPOSE 161/udp
 
 #CMD ["sh /usr/bin/mysqld_safe & sleep 10 && python3 /etc/rmon/start.py"]
-CMD ["supervisord", "-c", "/etc/supervisor.conf"]
+CMD ["python", "/etc/rmon/start.py"]
