@@ -7,8 +7,8 @@ import filter
 
 class rmon_filter:
 
-    def __init__(self, N_FILTROS, BBDD, comunidades):
-        self.filtro = filter.filter(N_FILTROS, BBDD)
+    def __init__(self, N_FILTROS, BBDD, comunidades, interfaces):
+        self.filtro = filter.filter(N_FILTROS, BBDD, interfaces)
         self.filtro.start()
         self.BBDD = BBDD
         self.comunidades = comunidades

@@ -31,7 +31,7 @@ class agente:
         self.get_ifDescr()
         
         # Creamos la instancia de la mib
-        self.mib = mib.mib(self.N_FILTROS, self.miBBDD)
+        self.mib = mib.mib(self.N_FILTROS, self.miBBDD, self.interfaces)
         
         # Configuramos la alarma
         signal.signal(signal.SIGALRM, self.update)

@@ -9,10 +9,11 @@ class filter:
     # Funciones Publicas #
     ######################
     
-    def __init__(self, N_FILTROS, BBDD):
+    def __init__(self, N_FILTROS, BBDD, interfaces):
         # Creamos las variables
         self.N_FILTROS = N_FILTROS
         self.BBDD = BBDD
+        self.interfaces = interfaces
         self.matches = Array('i', [0]*self.N_FILTROS)
         self.process = [0]*self.N_FILTROS
         self.indices = [0]*self.N_FILTROS
@@ -141,9 +142,10 @@ class filter:
             channelAcceptType = result[2]
             channelMatches = result[8]
             try:
-                interfaz = subprocess.check_output(["snmpget", "-v", "1", "-c", "public", "localhost:162", "1.3.6.1.2.1.2.2.1.2." + str(channelIfIndex)])
-                interfaz = interfaz.split("\"")
-                interfaz = interfaz[1]
+                interfaz = self.interfaces[str(channelIfIndex)]
+                # interfaz = subprocess.check_output(["snmpget", "-v", "1", "-c", "public", "localhost:162", "1.3.6.1.2.1.2.2.1.2." + str(channelIfIndex)])
+                # interfaz = interfaz.split("\"")
+                # interfaz = interfaz[1]
             except:
                 status = 0
                 print("Error al conseguir el interfaz")
