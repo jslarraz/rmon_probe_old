@@ -6,7 +6,7 @@ import sys
 ip_addr = "192.168.1.200"
 
 # Interface
-interface_name = "eth0"
+interface_name = "enp3s0"
 
 # Comunidad
 community = "jorge"
