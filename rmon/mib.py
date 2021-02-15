@@ -7,11 +7,11 @@ import MySQLdb
 
 class mib:
 
-    def __init__(self, N_FILTROS, BBDD, interfaces):
+    def __init__(self, N_FILTROS, BBDD, SNMP, interfaces):
         # Creamos un cursor hacia la base de datos
         self.comunidades = comunidades.comunidades(BBDD)
         self.rmon_filter = rmon_filter.rmon_filter(N_FILTROS, BBDD, self.comunidades, interfaces)
-        self.proxy = proxy.proxy(self.comunidades)
+        self.proxy = proxy.proxy(self.comunidades, SNMP)
 
 
     def get(self, oid):

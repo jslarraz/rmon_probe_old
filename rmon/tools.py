@@ -68,6 +68,12 @@ class BBDD:
         self.USER = USER
         self.PASS = PASS
 
+class SNMP_proxy:
+    def __init__(self, ADDR, COMMUNITY):
+        self.ADDR = ADDR
+        self.COMMUNITY = COMMUNITY
+
+
 def isINTEGER(val):
     try:
         int(val)

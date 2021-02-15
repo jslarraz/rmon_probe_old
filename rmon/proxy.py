@@ -4,8 +4,9 @@ from pysnmp.proto import api
 
 class proxy:
 
-    def __init__(self, comunidades):
+    def __init__(self, comunidades, SNMP):
         self.comunidades = comunidades
+        self.SNMP = SNMP
 
     def procesa_resp(self, aux):
         aux = aux.split(":")
@@ -41,7 +42,7 @@ class proxy:
         exito_resp = 1
 
         try:
-            aux = subprocess.check_output(["snmpget", "-v", "1", "-c", "public", "-Oben", "localhost:162", str(oid)])
+            aux = subprocess.check_output(["snmpget", "-v", "1", "-c", self.SNMP.COMMUNITY, "-Oben", self.SNMP.ADDR, str(oid)])
             oid_resp, type2_resp, val_resp = self.procesa_resp(aux)
 
         except:
@@ -65,7 +66,7 @@ class proxy:
 
         while ((permisos != 1) and (permisos != 3)) and exito_resp == 1:
             try:
-                aux = subprocess.check_output(["snmpgetnext", "-v", "1", "-c", "public", "-Oben", "localhost:162", str(oid_resp)])
+                aux = subprocess.check_output(["snmpgetnext", "-v", "1", "-c", self.SNMP.COMMUNITY, "-Oben", self.SNMP.ADDR, str(oid_resp)])
                 oid_resp, type2_resp, val_resp = self.procesa_resp(aux)
 
             except:
@@ -90,7 +91,7 @@ class proxy:
         exito_resp = 1
 
         try:
-            aux = subprocess.check_output(["snmpset", "-v", "1", "-c", "public", "-Oben", "localhost:162", str(oid)])
+            aux = subprocess.check_output(["snmpset", "-v", "1", "-c", self.SNMP.COMMUNITY, "-Oben", self.SNMP.ADDR, str(oid)])
             oid_resp, type2_resp, val_resp = self.procesa_resp(aux)
 
         except:

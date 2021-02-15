@@ -31,7 +31,7 @@ class agente:
         self.get_ifDescr()
         
         # Creamos la instancia de la mib
-        self.mib = mib.mib(self.N_FILTROS, self.miBBDD, self.interfaces)
+        self.mib = mib.mib(self.N_FILTROS, self.BBDD, self.SNMP, self.interfaces)
         
         # Configuramos la alarma
         signal.signal(signal.SIGALRM, self.update)
@@ -68,11 +68,15 @@ class agente:
                 elif substr[0] == "PORT":
                     self.PORT = int(substr[1])
                 elif substr[0] == "BBDD_ADDR":
-                    self.BBDD_ADDR = substr[1]
+                    BBDD_ADDR = substr[1]
                 elif substr[0] == "BBDD_USER":
-                    self.BBDD_USER = substr[1]
+                    BBDD_USER = substr[1]
                 elif substr[0] == "BBDD_PASS":
-                    self.BBDD_PASS = substr[1]
+                    BBDD_PASS = substr[1]
+                elif substr[0] == "SNMP_ADDR":
+                    SNMP_ADDR = substr[1]
+                elif substr[0] == "SNMP_COMMUNITY":
+                    SNMP_COMMUNITY = substr[1]
                 elif substr[0] == "N_FILTROS":
                     self.N_FILTROS = int(substr[1])
                 else:
@@ -81,10 +85,17 @@ class agente:
             line = fd.readline()
         fd.close()
 
+        try:
+            self.BBDD = tools.BBDD(BBDD_ADDR, BBDD_USER, BBDD_PASS)
+            self.SNMP = tools.SNMP_proxy(SNMP_ADDR, SNMP_COMMUNITY)
+        except:
+            print("Algunos parametros no estan definidos en el fichero de configuracíón rmon.conf")
+            exit(-1)
+
+
     # Test database connectivity
     def test_BBDD(self):
-        self.miBBDD = tools.BBDD(self.BBDD_ADDR, self.BBDD_USER, self.BBDD_PASS)
-        connection = MySQLdb.connect(host = self.BBDD_ADDR, user = self.BBDD_USER, passwd = self.BBDD_PASS)
+        connection = MySQLdb.connect(host = self.BBDD.ADDR, user = self.BBDD.USER, passwd = self.BBDD.PASS)
         cursor = connection.cursor()
         cursor.execute("SHOW DATABASES;")
         databases = cursor.fetchall()
@@ -104,6 +115,7 @@ class agente:
                         print("incorrect statement")
                     statement = ""
 
+
     # Obtain interfaces names, avoid mistakes from net snmp in ifDesc
     def get_ifDescr(self):
         self.interfaces = {}
@@ -116,6 +128,7 @@ class agente:
             self.interfaces[index] = interface
             fd.close()
 
+
     # Check if the if description match the name of the interface
     def check_ifDescr(self, oid, val):
         # Check if the response oid matches the ifDescr
@@ -126,6 +139,7 @@ class agente:
             if ifIndex in self.interfaces.keys():
                 return self.interfaces[ifIndex]
         return val
+
 
     # Update packet matches
     def update(self, signum, frame):
