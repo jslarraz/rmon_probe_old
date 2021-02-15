@@ -48,6 +48,8 @@ class agente:
         self.transportDispatcher.jobStarted(1)
 
         try:
+            # Decimos agente ON
+            print("SNMP Service ON")
             self.transportDispatcher.runDispatcher()
         except:
             self.transportDispatcher.closeDispatcher()
@@ -168,9 +170,6 @@ class agente:
     # Comenzamos a procesar las peticiones
     def cbFun(self, transportDispatcher, transportDomain, transportAddress, wholeMsg):
 
-        # Decimos agente ON
-        print("SNMP Service ON")
-
         while wholeMsg:
             # Comprobamos la version del protocolo utilizada en el mensaje recivido
             msgVer = api.decodeMessageVersion(wholeMsg)
@@ -227,7 +226,7 @@ class agente:
                         pendingErrors.append(
                             (pMod.apiPDU.setNoSuchInstanceError, errorIndex)
                             )
-                        break                
+                        break
 
             # SET PDU
             elif reqPDU.isSameTypeWith(pMod.SetRequestPDU()):

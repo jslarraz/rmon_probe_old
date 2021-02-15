@@ -15,11 +15,6 @@ class mib:
 
 
     def get(self, oid):
-        exito_resp = 0
-        type1_resp = ''
-        oid_resp = oid
-        type2_resp = ''
-        val_resp = ''
 
         if tools.menor_que(oid, '1.3.6.1.2.1.16.7'):
             exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.proxy.get(str(oid))
