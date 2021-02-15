@@ -10,6 +10,8 @@ import mib
 import signal
 import re
 import os
+import subprocess
+
 
 class agente:
 
@@ -18,14 +20,12 @@ class agente:
         global value
         value = 0
      
-        # Decimos agente ON
-        print("SNMP Service ON")
-
         # Leemos las opciones del fichero de configuracion
         self.load_config("/etc/rmon/rmon.conf")
 
-        # Comprobamos que existe la base de datos
+        # Comprobamos la conectividad a Mysql y NetSNMP
         self.test_BBDD()
+        self.test_SNMP()
 
         # Recogemos la informacion de los interfaces
         self.get_ifDescr()
@@ -52,6 +52,7 @@ class agente:
         except:
             self.transportDispatcher.closeDispatcher()
             raise
+
 
     # Load configuration from file
     def load_config(self, file):
@@ -95,25 +96,42 @@ class agente:
 
     # Test database connectivity
     def test_BBDD(self):
-        connection = MySQLdb.connect(host = self.BBDD.ADDR, user = self.BBDD.USER, passwd = self.BBDD.PASS)
-        cursor = connection.cursor()
-        cursor.execute("SHOW DATABASES;")
-        databases = cursor.fetchall()
 
-        if not('rmon' in str(databases)):
-            statement = ""
-            for line in open('/etc/rmon/mysql_config.sql'):
-                if re.match(r'--', line):
-                    continue
-                if not re.search(r'[^-;]+;', line):
-                    statement = statement + line
-                else:
-                    statement = statement + line
-                    try:
-                        cursor.execute(statement)
-                    except:
-                        print("incorrect statement")
-                    statement = ""
+        try:
+            connection = MySQLdb.connect(host = self.BBDD.ADDR, user = self.BBDD.USER, passwd = self.BBDD.PASS)
+            cursor = connection.cursor()
+            cursor.execute("SHOW DATABASES;")
+            databases = cursor.fetchall()
+
+            if not('rmon' in str(databases)):
+                statement = ""
+                for line in open('/etc/rmon/mysql_config.sql'):
+                    if re.match(r'--', line):
+                        continue
+                    if not re.search(r'[^-;]+;', line):
+                        statement = statement + line
+                    else:
+                        statement = statement + line
+                        try:
+                            cursor.execute(statement)
+                        except:
+                            print("incorrect statement")
+                        statement = ""
+        except:
+            print("Mysql is not running. Shutting down...")
+            exit(-1)
+
+
+    # Test SNMP proxy
+    def test_SNMP(self):
+
+        try:
+            #Get SysUpTime to test if it is working
+            aux = subprocess.check_output(["snmpget", "-v", "1", "-c", self.SNMP.COMMUNITY, "-Oben", self.SNMP.ADDR, "1.3.6.1.2.1.1.3.0"])
+
+        except:
+            print("NetSNMP is not running. Shutting down...")
+            exit(-1)
 
 
     # Obtain interfaces names, avoid mistakes from net snmp in ifDesc
@@ -149,6 +167,10 @@ class agente:
 
     # Comenzamos a procesar las peticiones
     def cbFun(self, transportDispatcher, transportDomain, transportAddress, wholeMsg):
+
+        # Decimos agente ON
+        print("SNMP Service ON")
+
         while wholeMsg:
             # Comprobamos la version del protocolo utilizada en el mensaje recivido
             msgVer = api.decodeMessageVersion(wholeMsg)
