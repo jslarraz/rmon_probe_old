@@ -3,10 +3,10 @@ import subprocess
 import sys
 
 # Direccion IP
-ip_addr = "192.168.1.200"
+ip_addr = ""
 
 # Comunidad
-community = "jorge"
+community = ""
 
 # Numero de filtros
 n = 32

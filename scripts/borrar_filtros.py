@@ -2,10 +2,10 @@ import os
 import subprocess
 
 # Direccion IP
-ip_addr = "192.168.1.200"
+ip_addr = ""
 
 # Comunidad
-community = "jorge"
+community = ""
 
 for j in range(32):
 	i = j+1
