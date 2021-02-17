@@ -1,0 +1,139 @@
+{
+  "users": [
+    {
+      "securityName": "Jorge",
+      "level": "authPriv",
+      "authAlg": "usmHMACMD5AuthProtocol",
+      "authKey": "ABCDEFGHIJK",
+      "privAlg": "usmDESPrivProtocol",
+      "privKey": "ABCDEFGHIJK"
+    },
+    {
+      "securityName": "usr-md5-1",
+      "level": "authNoPriv",
+      "authAlg": "usmHMACMD5AuthProtocol",
+      "authKey": "authKey_min8c"
+    },
+    {
+      "securityName": "usr-md5-2",
+      "level": "authNoPriv",
+      "authAlg": "usmHMACMD5AuthProtocol",
+      "authKey": "authKey_min8c"
+    },
+    {
+      "securityName": "usr-md5-3",
+      "level": "authNoPriv",
+      "authAlg": "usmHMACMD5AuthProtocol",
+      "authKey": "authKey_min8c"
+    },
+    {
+      "securityName": "usr-md5-4",
+      "level": "authNoPriv",
+      "authAlg": "usmHMACMD5AuthProtocol",
+      "authKey": "authKey_min8c"
+    },
+
+    {
+      "securityName": "Jorge2",
+      "level": "noAuthNoPriv"
+    }
+  ],
+  "groups": [
+    {
+      "groupName": "Admin",
+      "securityName": ["Jorge", "Jorge2"]
+    },
+    {
+      "groupName": "g1",
+      "securityName": ["usr-md5-1"]
+    },
+    {
+      "groupName": "g2",
+      "securityName": ["usr-md5-2"]
+    },
+    {
+      "groupName": "g3",
+      "securityName": ["usr-md5-3"]
+    },
+    {
+      "groupName": "g4",
+      "securityName": ["usr-md5-4"]
+    }
+  ],
+  "views": [
+    {
+      "viewName": "CPU-MIB",
+      "OID": ".1.3.6.1.2.1.1"
+    },
+    {
+      "viewName": "v1",
+      "OID": ".1.3"
+    },
+    {
+      "viewName": "v2",
+      "OID": ".1.3.6.1.4.1.28308.3.1.4"
+    },
+    {
+      "viewName": "v3",
+      "OID": ".1.3.6.1.4.1.28308.3.1.1.0"
+    },
+    {
+      "viewName": "v4",
+      "OID": ".1.3.6.1.4.1.28308.3.1.60.0"
+    }
+  ],
+  "access": [
+    {
+      "groupName": "Admin",
+      "level": "noAuthNoPriv",
+      "read": "CPU-MIB",
+      "write": "CPU-MIB",
+      "notify": "CPU-MIB"
+    },
+    {
+      "groupName": "g1",
+      "level": "authNoPriv",
+      "read": "v1",
+      "write": "v1",
+      "notify": "v1"
+    },
+    {
+      "groupName": "g2",
+      "level": "authNoPriv",
+      "read": "v2",
+      "write": "v2",
+      "notify": "v2"
+    },
+    {
+      "groupName": "g3",
+      "level": "authNoPriv",
+      "read": "v3",
+      "write": "v3",
+      "notify": "v3"
+    },
+    {
+      "groupName": "g4",
+      "level": "authNoPriv",
+      "read": "v4",
+      "write": "v4",
+      "notify": "v4"
+    }
+  ],
+
+  "network": {
+    "interfaces": [
+      {
+        "ip_addr": "0.0.0.0",
+        "port": "161"
+      }
+    ],
+    "notificationInterfaces": [
+      {
+        "ip_addr": "127.0.0.1",
+        "port": "163",
+        "securityName": "Jorge"
+      }
+    ]
+  }
+
+}

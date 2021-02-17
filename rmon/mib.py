@@ -26,8 +26,12 @@ class mib:
         #elif tools.menor_que(oid, '1.3.6.1.4.1.28309'):
         else:
             exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.comunidades.get(oid)
-        
-        return exito_resp, type1_resp, oid_resp, type2_resp, val_resp
+
+
+        if exito_resp == 0:
+            type2_resp = 'noSuchInstance'
+
+        return [oid_resp, val_resp, type2_resp]
 
 
     def getnext(self, oid, comunidad):
@@ -46,8 +50,7 @@ class mib:
         if tools.menor_que(oid, '1.3.6.1.4.1.28309') and exito_resp == 0:
             exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.comunidades.getnext(oid, comunidad)
 
-        return exito_resp, type1_resp, oid_resp, type2_resp, val_resp
-
+        return [oid_resp, val_resp, type2_resp]
 
 
 
@@ -63,9 +66,9 @@ class mib:
                 
         #elif tools.menor_que(oid, '1.3.6.1.4'):
         else: 
-            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.comunidades.set(oid,val)    
-        
-        return exito_resp, type1_resp, oid_resp, type2_resp, val_resp
+            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.comunidades.set(oid,val)
+
+        return [oid_resp, val_resp, type2_resp]
 
 
 
@@ -83,7 +86,7 @@ class mib:
         else:
             almacen = self.comunidades.backup(oid,almacen)    
 
-        return  almacen
+        return almacen
 
 
 

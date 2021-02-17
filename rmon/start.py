@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Iniciamos el agente
-import agente
 import subprocess
 import time
 
@@ -14,5 +13,11 @@ time.sleep(3)
 subprocess.call(["service", "snmpd", "restart"])
 time.sleep(3)
 
+
 # Start rmon agent
-miAgente = agente.agente()
+#import agente
+#agente.agente()
+
+# Start rmon agent3
+import agentV3_r1
+agentV3_r1.agent_v3('config.json')
