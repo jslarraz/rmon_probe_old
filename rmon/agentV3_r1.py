@@ -18,7 +18,7 @@ import os
 import subprocess
 
 import tools
-from agent_v3_tools import  set_snmp, usmVacmSetup, rollback, snmpSilentDrops, formato
+from agent_v3_tools import  usmVacmSetup, snmpSilentDrops, formato
 
 import json
 
@@ -103,7 +103,7 @@ class agent_v3:
 
         # Register SNMP Applications at the SNMP engine for particular SNMP context
         GCR = GetCommandResponder(snmpEngine, snmpContext, self.mib)
-        #SCR = SetCommandResponder(snmpEngine, snmpContext, self.mib)
+        SCR = SetCommandResponder(snmpEngine, snmpContext, self.mib)
         NCR = NextCommandResponder(snmpEngine, snmpContext, self.mib)
         #cmdrsp.BulkCommandResponder(snmpEngine, snmpContext)
         #self.ntfOrg = ntforg.NotificationOriginator()
@@ -467,76 +467,86 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
 
     # Función de inicialización de la clase. Se ejecutará cuando se cree la instancia de la clase
     def __init__(self, snmpEngine, snmpContext, mib):
+
         # Se ejecuta la función de inicialización de la clase que estamos extendiendo
         cmdrsp.CommandResponderBase.__init__(self,snmpEngine,snmpContext)
+
         # Creamos las variables pduType y mib, y las asignamos como globales para tener acceso en toda la clase
         self.pduType = ( rfc1905.SetRequestPDU.tagSet, )
         self.mib = mib
-        self.mib2 =[]
 
     # Función que se encargara de procesar las peticiones. Esta función es llamada cada vez que llegue una petición
     def handleMgmtOperation(self, snmpEngine, stateReference, contextName, PDU, acInfo):
-        # En el caso de que falle cualquier cosa durante el procesamiento del paquete enviare genErr
-        try:
 
-            # Creo el backup de la mib para poder hacer un rollback en caso de algun error.
-            self.mib2 = ET.fromstring(ET.tostring(self.mib))
+        # initialize variable for backups
+        almacen = []
 
-            # Extraemos las variable binding del paquete
-            varBinds = v2c.apiPDU.getVarBinds(PDU)
-            # Creamos un paquete de repuesta que va a ser igual que el de pregunta.
-            varBindsRsp = varBinds
-            # Creamos un indice para poder indentificar la variable que ha generado un error y poder añadirlo como errorIndex
-            index = 0
+        # Extraemos las variable binding del paquete
+        varBinds = v2c.apiPDU.getVarBinds(PDU)
 
-            # Inicializamos por defecto los campos errorStatus y errorIndex a 0
-            errorStatus = 0
-            errorIndex = 0
+        # Creamos un paquete de repuesta que va a ser igual que el de pregunta.
+        varBindsRsp = varBinds
 
-            # Comenzamos el procesado de las variable binding
-            for varBind in varBinds:
-                # Incrementamos el valor del indice que identificara el paquete que ha generado un error
-                index = index + 1
-                # Extraemos el Object Identifier, el valor y de que tipo es el valor
-                oid_o = str(varBind[0])
-                value = varBind[1]
-                type = str(varBind).split(' ')[1]
-                type = type.split('(')[0]
+        # Creamos un indice para poder indentificar la variable que ha generado un error y poder añadirlo como errorIndex
+        index = 0
 
+        # Inicializamos por defecto los campos errorStatus y errorIndex a 0
+        errorStatus = 0
+        errorIndex = 0
 
-                # Generamos unas variables auxiliares necesarias para cumplir con la sintaxis de la función verifyAccess que
-                # hemos obtenido del cmdrsp.py que hay en internet :)
-                acCtx = (snmpEngine, 3, acInfo[1][2], acInfo[1][3], contextName, self.pduType)
-                syntax = rfc1902.Integer.tagSet
-                # Esta función trata los diferentes casos de error de acceso que estan explicados en el codigo de la
-                # propia funcion. En el caso de que el error sea "notInView" la función devolverá 1 para que tratemos este
-                # error
-                access = verifyAccess(self,v2c.ObjectIdentifier(oid_o),syntax,0,'write',acCtx)
+        # Comenzamos el procesado de las variable binding
+        for varBind in varBinds:
+
+            # Incrementamos el valor del indice que identificara el paquete que ha generado un error
+            index = index + 1
+
+            # Extraemos el Object Identifier, el valor y de que tipo es el valor
+            oid_o = str(varBind[0])
+            value = varBind[1]
+            type = str(varBind).split(' ')[1]
+            type = type.split('(')[0]
+
+            # Inicializamos la variable result
+            result = [' ', ' ', ' ']
+
+            # Check if the request have permissions
+            verifyAccess = acInfo[0]
+            acCtx = acInfo[1]
+            try:
+                access = verifyAccess(v2c.ObjectIdentifier(oid_o), None, 0, 'write', acCtx)
+
+            except AuthorizationError:
+                # El varBind de respuesta sera el mismo que el de la peticion
+                varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
+                errorStatus = 16
+                break
+
+            except GenError:
+                # El varBind de respuesta sera el mismo que el de la peticion
+                varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
+                errorStatus = 5
+                break
+
+            try:
 
                  # En el caso de que si se haya producido el error "notInView"
-                if access == "noAccess":
+                if access == 1:
                     errorStatus = 6
                     errorIndex = index
 
                     try:
-                        rollback(self)
+                        self.mib.rollback(almacen)
                         break
                     except:
                         result[2] = "undoFailed"
 
-                # En el caso de que se haya producido un error de tipo "noSuchView", "noAccessEntry" o "noGroupName", enviamos un paquete
-                # con errorStatus = "authorizationError"
-                elif access == "authorizationError":
-                    errorStatus = 16
-                    break
 
                 # En el caso de que no se haya producido ningun error
                 else:
 
-                    # La función set_snmp interactua con el fichero xml para buscar el escribir el valor en la variable por la que nos
-                    # han preguntado. La variable que nos devuelve tiene el formato:
                     # result = [oid, value, type] de respuesta
-                    result = set_snmp(self, oid_o, value, type)
+                    almacen = self.mib.backup(oid_o,  almacen)
+                    result = self.mib.set(oid_o, value, type)
 
                     # Error "notWritable"
                     if result[2] == 'notWritable':
@@ -544,7 +554,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -555,7 +565,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -566,7 +576,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -577,7 +587,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -588,7 +598,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -599,7 +609,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -610,7 +620,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -621,7 +631,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -632,7 +642,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -643,7 +653,7 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                         errorIndex = index
 
                         try:
-                            rollback(self)
+                            self.mib.rollback(almacen)
                             break
                         except:
                             result[2] = "undoFailed"
@@ -655,17 +665,17 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                     break
 
 
-        # En el caso de que se genere un "genErr"
-        except:
-            # El varBind de respuesta sera el mismo que el de la peticion
-            varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
-            errorStatus = 5
-            errorIndex = 0
-
-            try:
-                rollback(self)
+            # En el caso de que se genere un "genErr"
             except:
-                errorStatus = 15
+                # El varBind de respuesta sera el mismo que el de la peticion
+                varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
+                errorStatus = 5
+                errorIndex = 0
+
+                try:
+                    self.mib.rollback(almacen)
+                except:
+                    errorStatus = 15
 
         # Intentamos enviar el paquete de respuesta
         try:

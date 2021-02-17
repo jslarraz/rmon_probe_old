@@ -60,7 +60,7 @@ class mib:
 
 
 
-    def set(self, oid, val):
+    def set(self, oid, val, type):
         
         if tools.menor_que(oid, '1.3.6.1.2.1.16.7'):
             exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.proxy.set(str(oid),val)
