@@ -84,7 +84,6 @@ class rmon_filter:
         oid_resp = oid
         val_resp = ""
         exito_resp = 1          # exito_resp indica si hemos podido encontrar el OID solicitado en la base de datos: 1 = true; 0 = false
-        permisos = 0
 
 
         # Si el oid es menor que nuestra raid
@@ -108,54 +107,41 @@ class rmon_filter:
         db_rmon.autocommit(True)
         cursor = db_rmon.cursor()
 
-        while ((permisos != 1) and (permisos != 3)) and exito_resp == 1:
 
-            while (oid_resp == oid) and (suboid != ['1','3','6','1','2','1','16','8','1','1','1','0']):
+        while (oid_resp == oid) and (suboid != ['1','3','6','1','2','1','16','8','1','1','1','0']):
 
-                cursor.execute("SELECT next_table FROM ts_filter WHERE orden = %s", (suboid[8],) )
+            cursor.execute("SELECT next_table FROM ts_filter WHERE orden = %s", (suboid[8],) )
+            result = cursor.fetchone()
+            if str(result) != "None":
+                tc_table = result[0]
+
+                cursor.execute("SELECT next_table, indices FROM " + tc_table + " WHERE orden = %s", (suboid[10],) )
                 result = cursor.fetchone()
                 if str(result) != "None":
-                    tc_table = result[0]
-                        
-                    cursor.execute("SELECT next_table, indices FROM " + tc_table + " WHERE orden = %s", (suboid[10],) )
-                    result = cursor.fetchone()
-                    if str(result) != "None":
-                        td_table = result[0]
-                        indice = result[1]
+                    td_table = result[0]
+                    indice = result[1]
 
-                        cursor.execute("SELECT " + indice + " FROM " + td_table + " WHERE " + indice + " > %s ORDER BY " + indice + " ASC", (suboid[11],)  )
+                    cursor.execute("SELECT " + indice + " FROM " + td_table + " WHERE " + indice + " > %s ORDER BY " + indice + " ASC", (suboid[11],)  )
+                    result = cursor.fetchone()
+
+                    if str(result) != "None":
+                        suboid_resp = suboid[0:11] +  [ str(int(result[0])) ]
+                        oid_resp = '.'.join(suboid_resp)
+
+                    else:
+                        cursor.execute("SELECT next_oid FROM " + tc_table + " WHERE orden = %s", (suboid[10],) )
                         result = cursor.fetchone()
 
                         if str(result) != "None":
-                            suboid_resp = suboid[0:11] +  [ str(int(result[0])) ] 
-                            oid_resp = '.'.join(suboid_resp)
-
-                        else:
-                            cursor.execute("SELECT next_oid FROM " + tc_table + " WHERE orden = %s", (suboid[10],) )
-                            result = cursor.fetchone()
-
-                            if str(result) != "None":
-                                suboid = str(result[0]).split('.') + ['0']
-
-                            else:
-                                exito_resp = 0
-
-                    else:
-                        exito_resp = 0
-
-                else:
-                    exito_resp = 0
+                            suboid = str(result[0]).split('.') + ['0']
 
 
-            if oid_resp == oid:
-                exito_resp = 0
-            else:
-                exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.get(oid_resp)                                             
 
-            permisos = self.comunidades.permiso(comunidad, oid_resp)
+        if oid_resp == oid:
+            exito_resp = 0
+        else:
+            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.get(oid_resp)
 
-            oid = oid_resp
-            suboid = str(oid).split('.')
 
         return exito_resp, type1_resp, oid_resp, type2_resp, val_resp
 

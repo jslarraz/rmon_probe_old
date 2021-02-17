@@ -403,32 +403,32 @@ class NextCommandResponder (cmdrsp.NextCommandResponder):
                 errorStatus = 5
                 break
 
-            #try:
+            try:
 
-            # Inicializamos access = 1 (No hay permisos), para forzar que entre al bucle al menos la primera vez
-            access = 1
-            # Mientras sigan quedando variables en la MIB, y la variable actual no tenga permisos de lectura seguimos buscando
-            while (access == 1) and (result[2] != 'endOfMibView'):
+                # Inicializamos access = 1 (No hay permisos), para forzar que entre al bucle al menos la primera vez
+                access = 1
+                # Mientras sigan quedando variables en la MIB, y la variable actual no tenga permisos de lectura seguimos buscando
+                while (access == 1) and (result[2] != 'endOfMibView'):
 
-                # result = [oid, value, type] de respuesta
-                result = self.mib.getnext(result[0])
+                    # result = [oid, value, type] de respuesta
+                    result = self.mib.getnext(result[0])
 
-                # En el caso de que el error sea "notInView" la función devolverá 1 y seguiremos iterando
-                access = verifyAccess(v2c.ObjectIdentifier(result[0]), None, 0, 'read', acCtx)
+                    # En el caso de que el error sea "notInView" la función devolverá 1 y seguiremos iterando
+                    access = verifyAccess(v2c.ObjectIdentifier(result[0]), None, 0, 'read', acCtx)
 
-            # Si hay endOfMibView el oid sera el mismo que en la peticion
-            if result[2] == 'endOfMibView':
-                result[0] = oid_o
+                # Si hay endOfMibView el oid sera el mismo que en la peticion
+                if result[2] == 'endOfMibView':
+                    result[0] = oid_o
 
-            formato(varBindsRsp, result)
+                formato(varBindsRsp, result)
 
 
-            # # En el caso de que se genere un "genErr"
-            # except:
-            #     # El varBind de respuesta sera el mismo que el de la peticion
-            #     varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
-            #     errorStatus = 5
-            #     errorIndex = 0
+            # En el caso de que se genere un "genErr"
+            except:
+                # El varBind de respuesta sera el mismo que el de la peticion
+                varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
+                errorStatus = 5
+                errorIndex = 0
 
 
         # Intentamos enviar el paquete de respuesta

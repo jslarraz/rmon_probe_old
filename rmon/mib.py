@@ -52,6 +52,8 @@ class mib:
         if tools.menor_que(oid, '1.3.6.1.4.1.28309') and exito_resp == 0:
             exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.comunidades.getnext(oid)
 
+        if exito_resp == 0:
+            type2_resp = 'endOfMibView'
 
         return [oid_resp, val_resp, type2_resp]
 

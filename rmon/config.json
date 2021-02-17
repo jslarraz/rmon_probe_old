@@ -63,7 +63,7 @@
   "views": [
     {
       "viewName": "CPU-MIB",
-      "OID": ".1.3.6.1.2.1.1"
+      "OID": ".1.3"
     },
     {
       "viewName": "v1",

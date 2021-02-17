@@ -93,7 +93,7 @@ class comunidades:
         type2_resp = ""
         oid_resp = oid
         val_resp = ""
-        exito_resp = 0           # exito_resp indica si hemos podido encontrar el OID solicitado en la base de datos: 1 = true; 0 = false
+        exito_resp = 1           # exito_resp indica si hemos podido encontrar el OID solicitado en la base de datos: 1 = true; 0 = false
 
         # Si el oid es menor que nuestra raid
         if tools.menor_que(oid, '1.3.6.1.4.1.28308.1.0'):
@@ -121,68 +121,55 @@ class comunidades:
             cursor = db_comunidades.cursor()
 
             # Si que es de mi arbol, asi que curso la peticion
-            while ((permisos != 1) and (permisos != 3)) and exito_resp == 1:
+            while (oid_resp == oid) and (suboid != ['1','3','6','1','4','1','28309','0','0']):
+                # Construimos la pKey y la sKey
+                cname = []
+                pKey = suboid[10:len(suboid)-1]
+                for i in pKey:
+                    cname.append(chr(int(i)))
+                cname = ''.join(cname)
+                sKey = suboid[len(suboid)-1]
+                pKey = '.'.join(pKey)
 
-                while (oid_resp == oid) and (suboid != ['1','3','6','1','4','1','28309','0','0']):
-                    # Construimos la pKey y la sKey
-                    cname = []
-                    pKey = suboid[10:len(suboid)-1]
-                    for i in pKey:
-                        cname.append(chr(int(i)))
-                    cname = ''.join(cname)
-                    sKey = suboid[len(suboid)-1]
-                    pKey = '.'.join(pKey)
-                    
-                    cursor.execute("SELECT next_table FROM ts_comunidades WHERE orden = %s", (suboid[7],) )
+                cursor.execute("SELECT next_table FROM ts_comunidades WHERE orden = %s", (suboid[7],) )
+                result = cursor.fetchone()
+                if str(result) != "None":
+                    tc_table = result[0]
+
+                    cursor.execute("SELECT next_table, indices FROM " + tc_table + " WHERE orden = %s", (suboid[9],) )
                     result = cursor.fetchone()
                     if str(result) != "None":
-                        tc_table = result[0]
-                            
-                        cursor.execute("SELECT next_table, indices FROM " + tc_table + " WHERE orden = %s", (suboid[9],) )
-                        result = cursor.fetchone()
-                        if str(result) != "None":
-                            td_table = result[0]
-                            indice = result[1]
+                        td_table = result[0]
+                        indice = result[1]
 
-                            cursor.execute("SELECT communityIndex, id FROM " + td_table + " WHERE communityName = %s and id > %s ORDER BY communityName ASC, id ASC", (cname,sKey,) )
+                        cursor.execute("SELECT communityIndex, id FROM " + td_table + " WHERE communityName = %s and id > %s ORDER BY communityName ASC, id ASC", (cname,sKey,) )
+                        result = cursor.fetchone()
+
+                        if str(result) != "None":
+                            suboid_resp = suboid[0:10] +  result[0].split('.') + [ str(int(result[1])) ]
+                            oid_resp = '.'.join(suboid_resp)
+
+                        else:
+                            cursor.execute("SELECT communityIndex, id FROM " + td_table + " WHERE communityName > %s ORDER BY communityName ASC, id ASC", (cname,) )
                             result = cursor.fetchone()
 
                             if str(result) != "None":
-                                suboid_resp = suboid[0:10] +  result[0].split('.') + [ str(int(result[1])) ] 
+                                suboid_resp = suboid[0:10] +  result[0].split('.') + [ str(int(result[1])) ]
                                 oid_resp = '.'.join(suboid_resp)
 
                             else:
-                                cursor.execute("SELECT communityIndex, id FROM " + td_table + " WHERE communityName > %s ORDER BY communityName ASC, id ASC", (cname,) )
+                                cursor.execute("SELECT next_oid FROM " + tc_table + " WHERE orden = %s", (suboid[9],) )
                                 result = cursor.fetchone()
 
                                 if str(result) != "None":
-                                    suboid_resp = suboid[0:10] +  result[0].split('.') + [ str(int(result[1])) ] 
-                                    oid_resp = '.'.join(suboid_resp)
+                                    suboid = str(result[0]).split('.') + ['0','0']
 
-                                else:
-                                    cursor.execute("SELECT next_oid FROM " + tc_table + " WHERE orden = %s", (suboid[9],) )
-                                    result = cursor.fetchone()
 
-                                    if str(result) != "None":
-                                        suboid = str(result[0]).split('.') + ['0','0']
+            if oid_resp == oid:
+                exito_resp = 0
+            else:
+                exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.get(oid_resp)
 
-                                    else:
-                                        exito_resp = 0
-
-                        else:
-                            exito_resp = 0
-
-                    else:
-                        exito_resp = 0
-
-                if oid_resp == oid:
-                    exito_resp = 0
-                else:
-                    exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.get(oid_resp)                                             
-            
-                permisos = self.permiso(comunidad, oid_resp)
-                oid = oid_resp
-                suboid = str(oid).split('.')
 
         return exito_resp, type1_resp, oid_resp, type2_resp, val_resp
 
