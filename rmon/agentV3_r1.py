@@ -104,7 +104,7 @@ class agent_v3:
         # Register SNMP Applications at the SNMP engine for particular SNMP context
         GCR = GetCommandResponder(snmpEngine, snmpContext, self.mib)
         #SCR = SetCommandResponder(snmpEngine, snmpContext, self.mib)
-        #NCR = NextCommandResponder(snmpEngine, snmpContext, self.mib)
+        NCR = NextCommandResponder(snmpEngine, snmpContext, self.mib)
         #cmdrsp.BulkCommandResponder(snmpEngine, snmpContext)
         #self.ntfOrg = ntforg.NotificationOriginator()
 
@@ -366,77 +366,70 @@ class NextCommandResponder (cmdrsp.NextCommandResponder):
     # Función que se encargara de procesar las peticiones. Esta función es llamada cada vez que llegue una petición
     def handleMgmtOperation(self, snmpEngine, stateReference, contextName, PDU, acInfo):
 
-        # En el caso de que falle cualquier cosa durante el procesamiento del paquete enviare genErr
-        try:
 
-            # Extraemos las variable binding del paquete
-            varBinds = v2c.apiPDU.getVarBinds(PDU)
-            # Creamos un paquete de repuesta vacio que iremos completando.
-            varBindsRsp = []
-            # Creamos un indice para poder indentificar la variable que ha generado un error y poder añadirlo como errorIndex
-            index = 0
+        # Extraemos las variable binding del paquete
+        varBinds = v2c.apiPDU.getVarBinds(PDU)
+        # Creamos un paquete de repuesta vacio que iremos completando.
+        varBindsRsp = []
 
-            # Inicializamos por defecto los campos errorStatus y errorIndex a 0
-            errorStatus = 0
-            errorIndex = 0
+        # Inicializamos por defecto los campos errorStatus y errorIndex a 0
+        errorStatus = 0
+        errorIndex = 0
 
-            # Comenzamos el procesado de las variable binding
-            for varBind in varBinds:
-                # Incrementamos el valor del indice que identificara el paquete que ha generado un error
-                index = index + 1
-                # Extraemos el Object Identifier por el que nos estan preguntando
-                oid_o = str(varBind[0])
+        # Comenzamos el procesado de las variable binding
+        for varBind in varBinds:
 
+            # Extraemos el Object Identifier por el que nos estan preguntando
+            oid_o = str(varBind[0])
 
-                # Inicializamos la variable result para ser coherentes con la estructura del bucle
-                result = [oid_o, ' ', ' ']
+            # Inicializamos la variable result para ser coherentes con la estructura del bucle
+            result = [oid_o, ' ', ' ']
 
-                # Comprobamos que la configuración de los permisos para ese usuario es correcta
+            # Check if the request have permissions
+            verifyAccess = acInfo[0]
+            acCtx = acInfo[1]
+            try:
+                access = verifyAccess(v2c.ObjectIdentifier(oid_o), None, 0, 'read', acCtx)
 
-                # Generamos unas variables auxiliares necesarias para cumplir con la sintaxis de la función verifyAccess que
-                # hemos obtenido del cmdrsp.py que hay en internet :)
-                acCtx = (snmpEngine, 3, acInfo[1][2], acInfo[1][3], contextName, self.pduType)
-                syntax = rfc1902.Integer.tagSet
-                # Esta función trata los diferentes casos de error de acceso que estan explicados en el codigo de la
-                # propia funcion. En el caso de que el error sea "notInView" la función devolverá 1 y seguiremos iterando
-                access = verifyAccess(self,v2c.ObjectIdentifier(result[0]),syntax,0,'read',acCtx)
+            except AuthorizationError:
+                # El varBind de respuesta sera el mismo que el de la peticion
+                varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
+                errorStatus = 16
+                break
 
-                # En el caso de que se haya producido un error de tipo "noSuchView", "noAccessEntry" o "noGroupName", enviamos un paquete
-                # con errorStatus = "authorizationError"
-                if access == "authorizationError":
-                    varBindsRsp = varBinds
-                    errorStatus = 16
-                    break
+            except GenError:
+                # El varBind de respuesta sera el mismo que el de la peticion
+                varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
+                errorStatus = 5
+                break
 
-                # Inicializamos access = 1 (No hay permisos), para forzar que entre al bucle al menos la primera vez
-                access = "noAccess"
-                # Mientras sigan quedando variables en la MIB, y la variable actual no tenga permisos de lectura seguimos buscando
-                while (access == "noAccess") and (result[2] != 'endOfMibView'):
-                    # La función get_next_snmp interactua con el fichero xml para buscar el valor de la variable por la que nos
-                    # han preguntado. La variable que nos devuelve tiene el formato:
-                    # result = [oid, value, type] de respuesta
-                    result = self.mib.getnext(result[0])
+            #try:
 
-                    # Generamos unas variables auxiliares necesarias para cumplir con la sintaxis de la función verifyAccess que
-                    # hemos obtenido del cmdrsp.py que hay en internet :)
-                    acCtx = (snmpEngine, 3, acInfo[1][2], acInfo[1][3], contextName, self.pduType)
-                    syntax = rfc1902.Integer.tagSet
-                    # Esta función trata los diferentes casos de error de acceso que estan explicados en el codigo de la
-                    # propia funcion. En el caso de que el error sea "notInView" la función devolverá 1 y seguiremos iterando
-                    access = verifyAccess(self,v2c.ObjectIdentifier(result[0]),syntax,0,'read',acCtx)
+            # Inicializamos access = 1 (No hay permisos), para forzar que entre al bucle al menos la primera vez
+            access = 1
+            # Mientras sigan quedando variables en la MIB, y la variable actual no tenga permisos de lectura seguimos buscando
+            while (access == 1) and (result[2] != 'endOfMibView'):
 
-                # Si hay endOfMibView el oid sera el mismo que en la peticion
-                if result[2] == 'endOfMibView':
-                    result[0] = oid_o
-                formato(varBindsRsp, result)
+                # result = [oid, value, type] de respuesta
+                result = self.mib.getnext(result[0])
+
+                # En el caso de que el error sea "notInView" la función devolverá 1 y seguiremos iterando
+                access = verifyAccess(v2c.ObjectIdentifier(result[0]), None, 0, 'read', acCtx)
+
+            # Si hay endOfMibView el oid sera el mismo que en la peticion
+            if result[2] == 'endOfMibView':
+                result[0] = oid_o
+
+            formato(varBindsRsp, result)
 
 
-        # En el caso de que se genere un "genErr"
-        except:
-            # El varBind de respuesta sera el mismo que el de la peticion
-            varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
-            errorStatus = 5
-            errorIndex = 0
+            # # En el caso de que se genere un "genErr"
+            # except:
+            #     # El varBind de respuesta sera el mismo que el de la peticion
+            #     varBindsRsp = v2c.apiPDU.getVarBinds(PDU)
+            #     errorStatus = 5
+            #     errorIndex = 0
+
 
         # Intentamos enviar el paquete de respuesta
         try:

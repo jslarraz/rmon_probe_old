@@ -7,12 +7,11 @@ import filter
 
 class rmon_filter:
 
-    def __init__(self, N_FILTROS, BBDD, comunidades, interfaces):
+    def __init__(self, N_FILTROS, BBDD, interfaces):
         self.filtro = filter.filter(N_FILTROS, BBDD, interfaces)
         self.filtro.start()
         self.BBDD = BBDD
-        self.comunidades = comunidades
-        
+
 
     def get(self, oid):   
         # Definimos las variables necesarias
@@ -76,7 +75,7 @@ class rmon_filter:
     #############################################################################################################################
 
 
-    def getnext(self, oid, comunidad):
+    def getnext(self, oid):
 
         # Definimos las variables necesarias
         suboid = str(oid).split('.')

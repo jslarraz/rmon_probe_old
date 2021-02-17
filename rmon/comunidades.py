@@ -86,23 +86,19 @@ class comunidades:
     #############################################################################################################################
 
 
-    def getnext(self, oid, comunidad):
+    def getnext(self, oid):
         # Definimos las variables necesarias
         suboid = str(oid).split('.')
         type1_resp = "ObjectName"
         type2_resp = ""
         oid_resp = oid
         val_resp = ""
-        exito_resp = 1          # exito_resp indica si hemos podido encontrar el OID solicitado en la base de datos: 1 = true; 0 = false
-        permisos = 0    
+        exito_resp = 0           # exito_resp indica si hemos podido encontrar el OID solicitado en la base de datos: 1 = true; 0 = false
 
         # Si el oid es menor que nuestra raid
         if tools.menor_que(oid, '1.3.6.1.4.1.28308.1.0'):
-            oid = "1.3.6.1.4.1.28308.1.0"
-            if self.permiso(comunidad, oid) == 1 or self.permiso(comunidad, oid) == 3:
-                suboid = ['1','3','6','1','4','1','28308','1','0']
-                oid_resp = '.'.join(suboid)
-                exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.get(oid_resp)                                             
+            oid_resp = "1.3.6.1.4.1.28308.1.0"
+            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.get(oid_resp)
 
         else:
             if tools.menor_que(oid, '1.3.6.1.4.1.28308.2'):

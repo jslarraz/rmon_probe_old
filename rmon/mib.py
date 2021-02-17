@@ -9,9 +9,10 @@ class mib:
 
     def __init__(self, N_FILTROS, BBDD, SNMP, interfaces):
         # Creamos un cursor hacia la base de datos
+        self.proxy = proxy.proxy(SNMP)
         self.comunidades = comunidades.comunidades(BBDD)
-        self.rmon_filter = rmon_filter.rmon_filter(N_FILTROS, BBDD, self.comunidades, interfaces)
-        self.proxy = proxy.proxy(self.comunidades, SNMP)
+        self.rmon_filter = rmon_filter.rmon_filter(N_FILTROS, BBDD, interfaces)
+
 
 
     def get(self, oid):
@@ -28,13 +29,14 @@ class mib:
             exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.comunidades.get(oid)
 
 
+        # TODO diferenciar noSuchIntance de noSuchObject
         if exito_resp == 0:
             type2_resp = 'noSuchInstance'
 
         return [oid_resp, val_resp, type2_resp]
 
 
-    def getnext(self, oid, comunidad):
+    def getnext(self, oid):
         exito_resp = 0
         type1_resp = ''
         oid_resp = oid
@@ -42,13 +44,14 @@ class mib:
         val_resp = ''
 
         if tools.menor_que(oid, '1.3.6.1.2.1.16.7'):
-            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.proxy.getnext(str(oid), comunidad)
+            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.proxy.getnext(str(oid))
 
         if tools.menor_que(oid, '1.3.6.1.2.1.16.8') and exito_resp == 0:
-            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.rmon_filter.getnext(oid, comunidad)
+            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.rmon_filter.getnext(oid)
 
         if tools.menor_que(oid, '1.3.6.1.4.1.28309') and exito_resp == 0:
-            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.comunidades.getnext(oid, comunidad)
+            exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.comunidades.getnext(oid)
+
 
         return [oid_resp, val_resp, type2_resp]
 

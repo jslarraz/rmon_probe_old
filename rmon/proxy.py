@@ -4,8 +4,7 @@ from pysnmp.proto import api
 
 class proxy:
 
-    def __init__(self, comunidades, SNMP):
-        self.comunidades = comunidades
+    def __init__(self,  SNMP):
         self.SNMP = SNMP
 
     def procesa_resp(self, aux):
@@ -22,6 +21,9 @@ class proxy:
         if type2_resp == "STRING":
             aux2 = aux2.split("\"")
             val_resp = aux2[1]
+        elif type2_resp == "Timeticks":
+            aux2 = aux2.split("(")[1]
+            val_resp = aux2.split(")")[0]
         else:
             aux2 = aux2.split(" ")
             aux2 = aux2[1]
@@ -56,23 +58,19 @@ class proxy:
     #############################################################################################################################
 
 
-    def getnext(self, oid, comunidad):   
+    def getnext(self, oid):
         oid_resp = oid
         val_resp = api.v1.Null('')
         type1_resp = "OID"
         type2_resp = ""
         exito_resp = 1
-        permisos = 0
 
-        while ((permisos != 1) and (permisos != 3)) and exito_resp == 1:
-            try:
-                aux = subprocess.check_output(["snmpgetnext", "-v", "1", "-c", self.SNMP.COMMUNITY, "-Oben", self.SNMP.ADDR, str(oid_resp)])
-                oid_resp, type2_resp, val_resp = self.procesa_resp(aux)
+        try:
+            aux = subprocess.check_output(["snmpgetnext", "-v", "1", "-c", self.SNMP.COMMUNITY, "-Oben", self.SNMP.ADDR, str(oid)])
+            oid_resp, type2_resp, val_resp = self.procesa_resp(aux)
 
-            except:
-                exito_resp = 0
-
-            permisos = self.comunidades.permiso(comunidad, oid_resp)
+        except:
+            exito_resp = 0
 
         return exito_resp, type1_resp, oid_resp, type2_resp, val_resp
 
