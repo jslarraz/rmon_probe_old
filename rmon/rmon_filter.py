@@ -48,19 +48,28 @@ class rmon_filter:
                         if str(result) != "None":
                             val_resp = result[0]
                         else:
+                            # No existe la instancia, devuelvo noSuchInstance
+                            type2_resp = 'noSuchInstance'
                             exito_resp = 0
 
                     else:
+                        # El tipo de acceso no coincide, (se deberia cumplir siempre)
+                        type2_resp = 'genErr'
                         exito_resp = 0
 
                 else:
+                    # Alguna parte del arbol no existe, devuelvo noSuchObject
+                    type2_resp = 'noSuchObject'
                     exito_resp = 0
 
             else:
+                # Alguna parte del arbol no existe, devuelvo noSuchObject
+                type2_resp = 'noSuchObject'
                 exito_resp = 0
                     
         else:
-            # Es de mi arbol pero falta alguna parte
+            # Es de mi arbol pero falta alguna parte, devuelvo noSuchObject
+            type2_resp = 'noSuchObject'
             exito_resp = 0
                 
 

@@ -156,10 +156,15 @@ def usmVacmSetup(self,filename):
     # SecurityName <-> CommunityName mapping.
     # Here we configure two distinct CommunityName's to control read and write
     # operations.
+
     config.addV1System(self.snmpEngine, 'my-read-area', 'public')
     config.addV1System(self.snmpEngine, 'my-write-area', 'private')
 
     # Allow full MIB access for this user / securityModels at VACM
+    config.addVacmUser(self.snmpEngine, 2, 'my-read-area', 'noAuthNoPriv', (1, 3, 6, 1, 2, 1))
+    config.addVacmUser(self.snmpEngine, 2, 'my-write-area', 'noAuthNoPriv', (1, 3, 6, 1, 2, 1), (1, 3, 6, 1, 2, 1))
+
+
+    # Allow full MIB access for this user / securityModels at VACM
     config.addVacmUser(self.snmpEngine, 1, 'my-read-area', 'noAuthNoPriv', (1, 3, 6, 1, 2, 1))
     config.addVacmUser(self.snmpEngine, 1, 'my-write-area', 'noAuthNoPriv', (1, 3, 6, 1, 2, 1), (1, 3, 6, 1, 2, 1))
-    ###
