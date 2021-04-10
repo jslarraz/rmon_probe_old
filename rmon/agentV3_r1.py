@@ -209,13 +209,15 @@ class agent_v3:
     def get_ifDescr(self):
         self.interfaces = {}
         for interface in os.listdir("/sys/class/net"):
-            fd = open("/sys/class/net/" + interface + "/ifindex")
-            try:
-                index = str(int(fd.readline()))
-            except:
-                continue
-            self.interfaces[index] = interface
-            fd.close()
+            # Prevent bonding_masters to generate an exception
+            if os.path.isdir("/sys/class/net/" + interface) and os.path.exists("/sys/class/net/" + interface + "/ifindex"):
+                fd = open("/sys/class/net/" + interface + "/ifindex")
+                try:
+                    index = str(int(fd.readline()))
+                except:
+                    continue
+                self.interfaces[index] = interface
+                fd.close()
 
 
     # Check if the if description match the name of the interface

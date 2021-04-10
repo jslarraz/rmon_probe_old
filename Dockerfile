@@ -1,5 +1,5 @@
 # Seleccionamos la imagen base
-FROM debian
+FROM debian:buster
 
 # Set some environment vars
 ENV DEBIAN_FRONTEND noninteractive
@@ -58,4 +58,5 @@ RUN cp service/rmon /etc/init.d/rmon
 EXPOSE 161/udp
 
 #CMD ["sh /usr/bin/mysqld_safe & sleep 10 && python3 /etc/rmon/start.py"]
-CMD ["python", "/etc/rmon/start.py"]
+WORKDIR /etc/rmon
+CMD ["python", "start.py"]
