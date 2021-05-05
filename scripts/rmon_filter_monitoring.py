@@ -1,14 +1,12 @@
 from snmp_requests import snmp_engine
-import time
 
-# Direccion IP
-ip_addr = ""
+# Read config
+import os
 
-# Interface
-interface_name = "eth0"
-
-# Comunidad
-community = ""
+ip_addr = os.environ.get('ip_addr', 'localhost')			# Direccion IP
+port = os.environ.get('port', 161)							# Puerto
+interface_name = os.environ.get('interface_name', 'eth0')	# Interface
+community = os.environ.get('community', 'public')			# Comunidad
 
 # Numero de filtros
 n = 32
@@ -27,9 +25,7 @@ user = {
 
 # Create the requests engine
 #eng = snmp_engine('3', user, '192.168.1.200', 161)
-eng = snmp_engine('1', 'private', '192.168.1.200', 161)
-
-t_start = time.time()
+eng = snmp_engine('1', community, ip_addr, port)
 
 #################################
 # Buscamos el OID del interface #
@@ -44,13 +40,12 @@ for varBind in varBinds:
 		try:
 			oid_interface = str(int(oid_interface))
 		except:
+			print("Interface " + interface_name + " has not been found in the agent")
 			exit(0)
 
 if oid_interface == None:
-	print("OID_interface is None, shutting down.")
+	print("Interface " + interface_name + " has not been found in the agent")
 	exit(0)
-
-print(oid_interface)
 
 
 ##########################
@@ -114,4 +109,3 @@ for i in range(n):
 
 	print("Filtro " + str(i+1))
 
-print(time.time()-t_start)

@@ -1,12 +1,12 @@
+from snmp_requests import snmp_engine
+
+# Read config
 import os
-import subprocess
-import sys
 
-# Direccion IP
-ip_addr = ""
-
-# Comunidad
-community = ""
+ip_addr = os.environ.get('ip_addr', 'localhost')			# Direccion IP
+port = os.environ.get('port', 161)							# Puerto
+community = os.environ.get('community', 'public')			# Comunidad
+eng = snmp_engine('1', community, ip_addr, port)             # Create engine
 
 # Numero de filtros
 n = 32
@@ -15,6 +15,5 @@ texto=['ARP_pkts','TCP_pkts','UDP_pkts','ICMP_pkts','HTTP_pkts_dst','HTTPS_pkts_
 for i in range(n):
 
     # Leer channelMatches
-    r = subprocess.check_output(["snmpget", "-v", "1", "-c", community, ip_addr, "1.3.6.1.2.1.16.7.2.1.9." + str(i+1)])
-    value = str(r).split(" ")[-1]
-    print(texto[i] + ": " + value)
+    r = eng.snmpget([["1.3.6.1.2.1.16.7.2.1.9." + str(i+1)]])
+    print(texto[i] + ": " + r[0][1][1])
