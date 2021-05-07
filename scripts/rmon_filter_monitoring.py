@@ -46,7 +46,7 @@ for varBind in varBinds:
 if oid_interface == None:
 	print("Interface " + interface_name + " has not been found in the agent")
 	exit(0)
-
+print("OID interface: " + oid_interface)
 
 ##########################
 # Insertamos los filtros #
