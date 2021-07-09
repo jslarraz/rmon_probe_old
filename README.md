@@ -5,7 +5,7 @@ The easiest way to get started is to use this probe as a docker container. You c
 following command.
 
 ```
-sudo docker run -p 161:161/udp --net=host --name rmon jslarraz/rmon
+sudo docker run -p 161:161/udp --net=host --name rmon_probe jslarraz/rmon_probe
 ```
 
 In this project, the SNMP communities and, therefore, the access privileges, are managed through a new MIB defined for 

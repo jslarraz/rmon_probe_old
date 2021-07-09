@@ -2,8 +2,8 @@
   <configuration default="false" name="Dockerfile" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
     <deployment type="dockerfile">
       <settings>
-        <option name="imageTag" value="jslarraz/rmon" />
-        <option name="containerName" value="rmon" />
+        <option name="imageTag" value="jslarraz/rmon_probe" />
+        <option name="containerName" value="rmon_probe" />
         <option name="portBindings">
           <list>
             <DockerPortBindingImpl>
@@ -13,7 +13,7 @@
             </DockerPortBindingImpl>
           </list>
         </option>
-        <option name="commandLineOptions" value="" />
+        <option name="commandLineOptions" value="--net=host" />
         <option name="sourceFilePath" value="Dockerfile" />
       </settings>
     </deployment>
