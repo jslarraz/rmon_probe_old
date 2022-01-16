@@ -8,6 +8,15 @@ following command.
 sudo docker run -p 161:161/udp --net=host --name rmon_probe jslarraz/rmon_probe
 ```
 
+If you want to run it on Docker for windows you will need the following workaround. The idea is to allow the rmon_probe
+container to capture packages on the host using  tshark (which is distributed as part of wireshark) over ssh, and the 
+use tcpreplay to send them over the interface of the docker container. This could be achieved by running the following 
+command on the rmon_probe container. 
+
+```
+ssh user@host tshark -w - 'not port 22' | tcpreplay -i eth0 -
+```
+
 In this project, the SNMP communities and, therefore, the access privileges, are managed through a new MIB defined for 
 this purpose, the communityManagement MIB. The agent is initialized with a default master community, "admin", with read 
 and write privileges on objects that belong to the communityManagement MIB and can be used to define new communities and 
