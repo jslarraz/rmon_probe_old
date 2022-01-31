@@ -7,7 +7,7 @@ The easiest way to get started is to use this probe as a standalone docker conta
 the following command.
 
 ```
-docker run -p 161:161/udp --net=host --name rmon_probe jslarraz/rmon_probe
+docker run -p 161:161/udp --net=host --name rmon_probe jslarraz/rmon_probe_standalone
 ```
 
 ## Better alternatives
