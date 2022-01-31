@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Importamos todas las librerias necesarias
+# Import required libraries
 from pysnmp.entity import engine, config
 from pysnmp.entity.rfc3413 import cmdrsp, context, ntforg
 from pysnmp.carrier.asynsock.dgram import udp
@@ -22,46 +22,39 @@ from agent_v3_tools import  usmVacmSetup, snmpSilentDrops, formato
 
 import json
 
-# Clase principal de nuestro agente
+# Main class
 class agent_v3:
-    ########################################################################################
-    ### Variables que van a ser atributos de la clase, para
-    ### ser accesibles desde cualquier método
-    ########################################################################################
-
 
     def __init__(self, filename):
 
-
-        # Leemos las opciones del fichero de configuracion
+        # Read options from config file
         self.load_config("/etc/rmon/rmon.conf")
 
-        # Comprobamos la conectividad a Mysql y NetSNMP
+        # Check snmp and database availability
         self.test_BBDD()
         self.test_SNMP()
 
-        # Recogemos la informacion de los interfaces
+        # Get interfaces info
         self.get_ifDescr()
 
-        # Creamos la instancia de la mib
+        # Create MIB instance
         self.mib = mib.mib(self.N_FILTROS, self.BBDD, self.SNMP, self.interfaces)
 
-        # Configuramos la alarma
+        # Config alarm for packets update
         signal.signal(signal.SIGALRM, self.update)
         signal.alarm(10)
 
-        # Creo el SNMP engine
+        # Create SNMP engine
         snmpEngine = engine.SnmpEngine()
         self.snmpEngine = snmpEngine
 
-        # Obtengo el SNMP context por defecto del SNMP engine
+        # Get default context
         snmpContext = context.SnmpContext(snmpEngine)
 
         # SNMPv3 VACM / USM setup
         usmVacmSetup(self, filename)
 
-
-        # Configurar socket
+        # Socket config
         self.iniFile = json.loads(open(filename, 'rb').read())
         network = self.iniFile['network']
         interfaces = network['interfaces']
@@ -75,8 +68,7 @@ class agent_v3:
             udp.UdpTransport().openServerMode((ip_addr, int(port))),
         )
 
-
-        # Configuraciones para la generacion de notificaciones
+        # Config for notification generation
         nInterfaces = network['notificationInterfaces']
         nInterface = nInterfaces[0]
         ip_addr = nInterface['ip_addr']
@@ -108,15 +100,12 @@ class agent_v3:
         #cmdrsp.BulkCommandResponder(snmpEngine, snmpContext)
         #self.ntfOrg = ntforg.NotificationOriginator()
 
-
-
-
         # Register an imaginary never-ending job to keep I/O dispatcher running forever
         snmpEngine.transportDispatcher.jobStarted(1)
 
         # Run I/O dispatcher which would receive queries and send responses
         try:
-            # Decimos agente ON
+            # Agent on
             print("SNMP Service ON")
             snmpEngine.transportDispatcher.runDispatcher()
         except:

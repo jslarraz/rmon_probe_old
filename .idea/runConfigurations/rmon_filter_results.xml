@@ -5,7 +5,7 @@
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
-      <env name="ip_addr" value="192.168.86.12" />
+      <env name="ip_addr" value="192.168.1.129" />
       <env name="port" value="161" />
     </envs>
     <option name="SDK_HOME" value="" />
@@ -29,7 +29,7 @@
         <list />
       </option>
       <option name="publishAllPorts" value="false" />
-      <option name="runCliOptions" value="--entrypoint= --rm" />
+      <option name="runCliOptions" value="--net=host --privileged --entrypoint= --rm " />
       <option name="version" value="2" />
       <option name="volumeBindings">
         <list>

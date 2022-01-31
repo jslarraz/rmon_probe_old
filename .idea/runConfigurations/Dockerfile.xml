@@ -13,7 +13,7 @@
             </DockerPortBindingImpl>
           </list>
         </option>
-        <option name="commandLineOptions" value="--net=host" />
+        <option name="commandLineOptions" value="--restart always" />
         <option name="sourceFilePath" value="Dockerfile" />
       </settings>
     </deployment>
