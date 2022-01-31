@@ -1,4 +1,4 @@
-# Seleccionamos la imagen base
+# Choose base image
 FROM debian:buster
 
 # Set some environment vars
@@ -15,25 +15,15 @@ RUN apt-get update
 RUN apt-get -y install apt-utils
 
 # Copy project and change directory
-ADD . /tmp
-WORKDIR /tmp
+WORKDIR /tmp/rmon
+ADD rmon .
+
 
 # Install MySQL database
-RUN apt-get -y install mariadb-server mariadb-client libmariadb3 mariadb-backup mariadb-common
-
-# Load database and create user
-RUN /usr/bin/mysqld_safe & \
-    sleep 10s &&\
-    mysql < rmon/mysql_config.sql
+RUN apt-get -y install mariadb-client
 
 # Install NetSNMP rmon and manager
-RUN apt-get -y install snmpd
 RUN apt-get -y install snmp
-
-# Change snmp default port
-RUN sed -i -e"s/^agentAddress\s*udp:127.0.0.1:161/agentAddress  udp:127.0.0.1:162/" /etc/snmp/snmpd.conf
-RUN sed -i -e"s/^view\s*systemonly\s*included\s*.1.3.6.1.2.1.1/view systemonly included .1.3.6.1.2.1/" /etc/snmp/snmpd.conf
-
 
 # Install dependencies for RMON
 RUN apt-get -y install procps
@@ -47,16 +37,14 @@ RUN apt-get -y install python
 RUN apt-get -y install python-pip
 RUN apt-get -y install python-mysqldb
 
-
-
 RUN pip install -r requirements.txt
 
 # Install RMON
-RUN cp -r rmon /etc
-RUN cp service/rmon /etc/init.d/rmon
+RUN cp -r /tmp/rmon /etc
+
 
 EXPOSE 161/udp
 
 #CMD ["sh /usr/bin/mysqld_safe & sleep 10 && python3 /etc/rmon/start.py"]
 WORKDIR /etc/rmon
-CMD ["python", "start.py"]
+CMD ["python", "agenteV3_r1.py"]

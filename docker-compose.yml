@@ -3,38 +3,50 @@ version: '3.3'
 services:
   db:
     image: mariadb:latest
+    container_name: db
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - rmon_network
     restart: always
     environment:
-      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/rmon-db-root
-      MARIADB_DATABASE_FILE: /run/secrets/rmon-db-name
-      MARIADB_USER_FILE: /run/secrets/rmon-db-user
-      MARIADB_PASSWORD_FILE: /run/secrets/rmon-db-pass
+      MARIADB_ROOT_PASSWORD: toor
+      MARIADB_DATABASE: rmon
+      MARIADB_USER: rmon
+      MARIADB_PASSWORD: rmon
 
   netsnmp:
-    image: sastre3/netsnmp:latest
+    image: jslarraz/netsnmp:latest
+    networks:
+      - rmon_network
     restart: always
     environment:
-      RO_COMMUNITY_FILE: /run/secrets/rmon-ro-community
-      RW_COMMUNITY_FILE: /run/secrets/rmon-rw_community
+      RO_COMMUNITY: public
+      RW_COMMUNITY: private
 
-  wordpress:
+  rmon:
     depends_on:
       - db
       - netsnmp
     build: .
+    networks:
+      - rmon_network
     ports:
-      - "161:161"
+      - "161:161/udp"
     restart: always
     environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-      WORDPRESS_DB_NAME: wordpress
-      RO_COMMUNITY_FILE:
-      RW_COMMUNITY_FILE:
-      RMON_HOST:
-      RO_COMMUNITY_FILE
+      MARIADB_HOST: db:3306
+      MARIADB_DATABASE: rmon
+      MARIADB_USER: rmon
+      MARIADB_NAME: rmon
+      NETSNMP_HOST: netsnmp:161
+      NETSNMP_RO_COMMUNITY: public
+      NETSNMPRW_COMMUNITY: private
+      RMON_HOST: 0.0.0.0/161
+      RMON_MAX_FILTERS: 50
+
 volumes:
     db_data: {}
+
+networks:
+  rmon_network:
