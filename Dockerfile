@@ -53,7 +53,6 @@ RUN pip install -r requirements.txt
 
 # Install RMON
 RUN cp -r rmon /etc
-RUN cp service/rmon /etc/init.d/rmon
 
 EXPOSE 161/udp
 
