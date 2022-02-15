@@ -10,9 +10,9 @@
       <env name="interface_name" value="eth0" />
       <env name="port" value="161" />
     </envs>
-    <option name="SDK_HOME" value="" />
+    <option name="SDK_HOME" value="docker://jslarraz/rmon_probe:latest/python" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
-    <option name="IS_MODULE_SDK" value="true" />
+    <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="DockerContainerSettingsRunConfigurationExtension">

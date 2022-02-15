@@ -16,29 +16,33 @@ import signal
 import re
 import os
 import subprocess
+import json
+import logging
 
 import tools
 from agent_v3_tools import  usmVacmSetup, snmpSilentDrops, formato
-
-import json
 
 # Main class
 class agent_v3:
 
     def __init__(self, filename):
 
-        # Read options from config file
-        self.load_config("/etc/rmon/rmon.conf")
+        # Load config file
+        try:
+            configFile = json.loads(open(filename, 'rb').read())
+        except:
+            logging.error("Wrong config file format. Failed during JSON parsing")
 
         # Check snmp and database availability
-        self.test_BBDD()
-        self.test_SNMP()
+        bbdd = self.get_BBDD(configFile['mariadb'] if "mariadb" in configFile else None)
+        netsnmp = self.get_SNMP(configFile['netsnmp']if "netsnmp" in configFile else None)
 
         # Get interfaces info
         self.get_ifDescr()
 
         # Create MIB instance
-        self.mib = mib.mib(self.N_FILTROS, self.BBDD, self.SNMP, self.interfaces)
+        n_filtros = self.get_property("n_filtros", configFile, 50)
+        self.mib = mib.mib(n_filtros, bbdd, netsnmp, self.interfaces)
 
         # Config alarm for packets update
         signal.signal(signal.SIGALRM, self.update)
@@ -106,64 +110,37 @@ class agent_v3:
         # Run I/O dispatcher which would receive queries and send responses
         try:
             # Agent on
-            print("SNMP Service ON")
+            logging.info("SNMP Service ON")
             snmpEngine.transportDispatcher.runDispatcher()
         except:
             snmpEngine.transportDispatcher.closeDispatcher()
             raise
 
+    # Load property, first env, then config file, last default
+    def get_property(self, property, config, default):
 
+        if os.getenv(property.upper()) is not None:
+            return os.getenv(property.upper())
+        if (config is not None) and (property in config):
+            return config[property]
+        return default
 
-    # Load configuration from file
-    def load_config(self, file):
-        fd = open(file)
-        line = fd.readline()
-        while line:
-            if '=' in line:
-                substr = line.split('=')
-                substr[1] = substr[1].split('\n')
-                substr[1] = substr[1][0]
+    # Get database connection
+    def get_BBDD(self, config):
 
-                if substr[0] == "IP_ADDR":
-                    self.IP_ADDR = substr[1]
-                elif substr[0] == "PORT":
-                    self.PORT = int(substr[1])
-                elif substr[0] == "BBDD_ADDR":
-                    BBDD_ADDR = substr[1]
-                elif substr[0] == "BBDD_USER":
-                    BBDD_USER = substr[1]
-                elif substr[0] == "BBDD_PASS":
-                    BBDD_PASS = substr[1]
-                elif substr[0] == "SNMP_ADDR":
-                    SNMP_ADDR = substr[1]
-                elif substr[0] == "SNMP_COMMUNITY":
-                    SNMP_COMMUNITY = substr[1]
-                elif substr[0] == "N_FILTROS":
-                    self.N_FILTROS = int(substr[1])
-                else:
-                    print("Error al leer datos de configuracion")
-
-            line = fd.readline()
-        fd.close()
+        HOST = self.get_property("mariadb_host", config, "127.0.0.1")
+        USER = self.get_property("mariadb_user", config, "rmon")
+        PASS = self.get_property("mariadb_pass", config, "rmon")
+        DATABASE = self.get_property("mariadb_database", config, "rmon")
 
         try:
-            self.BBDD = tools.BBDD(BBDD_ADDR, BBDD_USER, BBDD_PASS)
-            self.SNMP = tools.SNMP_proxy(SNMP_ADDR, SNMP_COMMUNITY)
-        except:
-            print("Algunos parametros no estan definidos en el fichero de configuracíón rmon.conf")
-            exit(-1)
-
-
-    # Test database connectivity
-    def test_BBDD(self):
-
-        try:
-            connection = MySQLdb.connect(host = self.BBDD.ADDR, user = self.BBDD.USER, passwd = self.BBDD.PASS)
+            connection = MySQLdb.connect(host=HOST, user=USER, passwd=PASS)
             cursor = connection.cursor()
             cursor.execute("SHOW DATABASES;")
             databases = cursor.fetchall()
 
-            if not('rmon' in str(databases)):
+            if not(DATABASE in str(databases)):
+                logging.warning("database " + DATABASE + " not found in the database server " + HOST)
                 statement = ""
                 for line in open('/etc/rmon/mysql_config.sql'):
                     if re.match(r'--', line):
@@ -175,22 +152,31 @@ class agent_v3:
                         try:
                             cursor.execute(statement)
                         except:
-                            print("incorrect statement")
+                            logging.warning("incorrect sql statement while creating database instance")
                         statement = ""
+
+            # return connection
+            return tools.BBDD(HOST, USER, PASS)
         except:
-            print("Mysql is not running. Shutting down...")
+            logging.error("Mysql is not running. Shutting down...")
             exit(-1)
 
 
     # Test SNMP proxy
-    def test_SNMP(self):
+    def get_SNMP(self, config):
+
+        HOST = self.get_property("netsnmp_host", config, "127.0.0.1")
+        COMMUNITY = self.get_property("netsnmp_community", config, "public")
 
         try:
             #Get SysUpTime to test if it is working
-            aux = subprocess.check_output(["snmpget", "-v", "1", "-c", self.SNMP.COMMUNITY, "-Oben", self.SNMP.ADDR, "1.3.6.1.2.1.1.3.0"])
+            aux = subprocess.check_output(["snmpget", "-v", "1", "-c", COMMUNITY, "-Oben", HOST, "1.3.6.1.2.1.1.3.0"])
+
+            import tools
+            return tools.SNMP_proxy(HOST, COMMUNITY)
 
         except:
-            print("NetSNMP is not running. Shutting down...")
+            logging.error("NetSNMP is not running. Shutting down...")
             exit(-1)
 
 
@@ -246,7 +232,7 @@ class GetCommandResponder (cmdrsp.GetCommandResponder):
         cmdrsp.CommandResponderBase.__init__(self,snmpEngine,snmpContext)
 
         # Creamos las variables pduType y mib, y las asignamos como globales para tener acceso en toda la clase
-        self.pduType = ( rfc1905.GetRequestPDU.tagSet, )
+        self.pduType = (rfc1905.GetRequestPDU.tagSet, )
         self.mib = mib
 
     # Función que se encargara de procesar las peticiones. Esta función es llamada cada vez que llegue una petición

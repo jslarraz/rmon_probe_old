@@ -3,7 +3,6 @@ version: '3.3'
 services:
   db:
     image: mariadb:latest
-    container_name: db
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -41,7 +40,7 @@ services:
       MARIADB_NAME: rmon
       NETSNMP_HOST: netsnmp:161
       NETSNMP_RO_COMMUNITY: public
-      NETSNMPRW_COMMUNITY: private
+      NETSNMP_RW_COMMUNITY: private
       RMON_HOST: 0.0.0.0/161
       RMON_MAX_FILTERS: 50
 
