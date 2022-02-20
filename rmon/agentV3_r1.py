@@ -28,10 +28,13 @@ class agent_v3:
     def __init__(self, filename):
 
         # Load config file
+        configFile = None
         try:
             configFile = json.loads(open(filename, 'rb').read())
         except:
-            logging.error("Wrong config file format. Failed during JSON parsing")
+            logging.error("Wrong config file format. Failed during JSON parsing. Aborting...")
+            exit(-1)
+
 
         # Check snmp and database availability
         bbdd = self.get_BBDD(configFile['mariadb'] if "mariadb" in configFile else None)
@@ -682,6 +685,10 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
                 snmpSilentDrops(self)
 
 
-
-local_agent_v3 = agent_v3("config.json")
+if __name__ == "__main__":
+    try:
+        os.system("snmpd")
+    except:
+        pass
+    local_agent_v3 = agent_v3("config.json")
 

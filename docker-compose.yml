@@ -14,33 +14,23 @@ services:
       MARIADB_USER: rmon
       MARIADB_PASSWORD: rmon
 
-  netsnmp:
-    image: jslarraz/netsnmp:latest
-    networks:
-      - rmon_network
-    restart: always
-    environment:
-      RO_COMMUNITY: public
-      RW_COMMUNITY: private
-
   rmon:
     depends_on:
       - db
-      - netsnmp
     build: .
+    command: bash -c "snmpd && python agentV3_r1.py"
     networks:
       - rmon_network
     ports:
       - "161:161/udp"
     restart: always
     environment:
-      MARIADB_HOST: db:3306
+      MARIADB_HOST: db
       MARIADB_DATABASE: rmon
       MARIADB_USER: rmon
       MARIADB_NAME: rmon
-      NETSNMP_HOST: netsnmp:161
-      NETSNMP_RO_COMMUNITY: public
-      NETSNMP_RW_COMMUNITY: private
+      NETSNMP_HOST: localhost:162
+      NETSNMP_COMMUNITY: public
       RMON_HOST: 0.0.0.0/161
       RMON_MAX_FILTERS: 50
 

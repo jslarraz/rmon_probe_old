@@ -5,8 +5,8 @@
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
-      <env name="ip_addr" value="192.168.1.129" />
-      <env name="community" value="private" />
+      <env name="ip_addr" value="192.168.1.130" />
+      <env name="community" value="public" />
       <env name="interface_name" value="eth0" />
       <env name="port" value="161" />
     </envs>

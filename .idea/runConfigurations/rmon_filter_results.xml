@@ -5,7 +5,7 @@
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
-      <env name="ip_addr" value="192.168.1.129" />
+      <env name="ip_addr" value="192.168.1.130" />
       <env name="port" value="161" />
     </envs>
     <option name="SDK_HOME" value="docker://jslarraz/rmon_probe:latest/python" />
