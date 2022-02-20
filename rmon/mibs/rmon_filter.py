@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Importamos todo lo necesario
 import MySQLdb
-import tools
-import filter
+from tools import tools
+from functional import filter
+
 
 
 class rmon_filter:

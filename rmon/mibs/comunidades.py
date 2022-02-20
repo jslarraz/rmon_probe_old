@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Importamos todo lo necesario
 import MySQLdb
-import tools
+import tools.tools
 
 
 class comunidades:
@@ -96,12 +96,12 @@ class comunidades:
         exito_resp = 1           # exito_resp indica si hemos podido encontrar el OID solicitado en la base de datos: 1 = true; 0 = false
 
         # Si el oid es menor que nuestra raid
-        if tools.menor_que(oid, '1.3.6.1.4.1.28308.1.0'):
+        if rmon.tools.menor_que(oid, '1.3.6.1.4.1.28308.1.0'):
             oid_resp = "1.3.6.1.4.1.28308.1.0"
             exito_resp, type1_resp, oid_resp, type2_resp, val_resp = self.get(oid_resp)
 
         else:
-            if tools.menor_que(oid, '1.3.6.1.4.1.28308.2'):
+            if rmon.tools.menor_que(oid, '1.3.6.1.4.1.28308.2'):
                 suboid = ['1','3','6','1','4','1','28308','2']
             
             # Si falta alguna parte del oid la completamos de forma coherente para que sea el siguiente
@@ -304,7 +304,7 @@ class comunidades:
                                     # Si no es el campo EntryStatus, lo escribo
                                     else:
                                         # !!!!!!!!!!! CUIDADO CON EL TIPO DE DATOS QUE INTRODUCZCO 
-                                        if tools.isType(val, type2_resp):
+                                        if rmon.tools.isType(val, type2_resp):
                                             print("escribo el valor recibido")
                                             cursor.execute("UPDATE " + next_table + " SET " + name + " = \'" + str(val) + "\' WHERE communityIndex = %s and id = %s", (pKey,sKey,) )
                                         else:

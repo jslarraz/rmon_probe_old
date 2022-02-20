@@ -1,5 +1,4 @@
 import MySQLdb
-from scapy.all import *
 from multiprocessing import Process, Value, Array
 import pcap
 

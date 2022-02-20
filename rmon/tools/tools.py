@@ -1,8 +1,5 @@
 from pysnmp.proto import api
-import MySQLdb
-import subprocess
-import os
-import signal
+
 
 def mayor_que(oid1, oid2):
     resultado = 0

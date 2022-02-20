@@ -1,8 +1,5 @@
-import proxy
-import rmon_filter
-import comunidades
-import tools
-import MySQLdb
+from mibs import comunidades, rmon_filter, proxy
+from tools import tools
 
 
 class mib:

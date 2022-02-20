@@ -1,4 +1,3 @@
-import tools
 import subprocess
 from pysnmp.proto import api
 

@@ -3,12 +3,11 @@
 
 # Import required libraries
 from pysnmp.entity import engine, config
-from pysnmp.entity.rfc3413 import cmdrsp, context, ntforg
+from pysnmp.entity.rfc3413 import cmdrsp, context
 from pysnmp.carrier.asynsock.dgram import udp
 from pysnmp.proto.api import v2c
-from pysnmp.smi import exval
-from pysnmp.smi.error import GenError, AuthorizationError, NoAccessError
-from pysnmp.proto import rfc1905, rfc1902
+from pysnmp.smi.error import GenError, AuthorizationError
+from pysnmp.proto import rfc1905
 
 import MySQLdb
 import mib
@@ -19,8 +18,8 @@ import subprocess
 import json
 import logging
 
-import tools
-from agent_v3_tools import  usmVacmSetup, snmpSilentDrops, formato
+from tools import tools
+from tools.agent_v3_tools import  usmVacmSetup, snmpSilentDrops, formato
 
 # Main class
 class agent_v3:
@@ -175,7 +174,7 @@ class agent_v3:
             #Get SysUpTime to test if it is working
             aux = subprocess.check_output(["snmpget", "-v", "1", "-c", COMMUNITY, "-Oben", HOST, "1.3.6.1.2.1.1.3.0"])
 
-            import tools
+            import rmon.tools.tools
             return tools.SNMP_proxy(HOST, COMMUNITY)
 
         except:
