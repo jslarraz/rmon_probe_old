@@ -5,7 +5,7 @@
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
-      <env name="ip_addr" value="192.168.1.130" />
+      <env name="ip_addr" value="observer.lan" />
       <env name="port" value="161" />
       <env name="community" value="private" />
     </envs>

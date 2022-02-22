@@ -70,3 +70,9 @@ system architecture, implementation decisions and performance test is available 
 
 https://zaguan.unizar.es/record/31543?ln=en
 
+
+
+##Run things without root
+
+apt-get install libcap2-bin
+sudo setcap cap_net_bind_service,cap_net_raw,cap_net_admin=eip /usr/bin/python2.7

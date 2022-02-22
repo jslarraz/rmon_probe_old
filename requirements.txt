@@ -1,4 +1,1 @@
-pyasn1
-pysnmp
 snmp_requests
-scapy

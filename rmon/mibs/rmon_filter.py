@@ -215,11 +215,11 @@ class rmon_filter:
                                     cursor.execute("UPDATE " + next_table + " SET " + name + " = 3 WHERE " + indice + " = %s", (suboid[11],) )
                                 # Si no es un 2, error
                                 else:
-                                    print ("error")
+                                    print ("error 1")
                                     exito_resp = 0
                             # Si no es el campo EntryStatus, error
                             else:
-                                print ("error")
+                                print ("error 2")
                                 exito_resp = 0
                         # Si existe, cogemos el valor y consideramos los diferentes casos
                         else:
@@ -248,12 +248,12 @@ class rmon_filter:
                                             self.filtro.delete(suboid[11])
                                     # Si no es ninguno de los anteriores, error
                                     else:
-                                        print ("error")
+                                        print ("error 3")
                                         exito_resp = 0
                                 # Si no es el campo EntryStatus, error
                                 else:
                                     exito_resp = 0
-                                    print ("error")
+                                    print ("error 4")
 
                             elif str(status_val) == "3":
                                 if name == status_name:
@@ -273,13 +273,13 @@ class rmon_filter:
                                         cursor.execute("DELETE FROM " + next_table + " WHERE " + indice + " = %s", (suboid[11],) )
                                     # Si no es ninguno de los anteriores, error
                                     else:
-                                        print ("error")
+                                        print ("error 5")
                                         exito_resp = 0 
                                 # Si no es el campo EntryStatus, lo escribo
                                 else:
                                     # !!!!!!!!!!! CUIDADO CON EL TIPO DE DATOS QUE INTRODUCZCO 
                                     if tools.isType(val, type2_resp):
-                                        print ("escribo el valor recibido")
+                                        print ("escribo el valor recibido: " + str(val))
                                         cursor.execute("UPDATE " + next_table + " SET " + name + " = \'" + str(val) + "\' WHERE " + indice + " = %s", (suboid[11],) )
                                     else:
                                         print ("El tipo introducido no coincide con el de la mib")

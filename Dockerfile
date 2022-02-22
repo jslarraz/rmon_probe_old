@@ -7,7 +7,6 @@ RUN apt-get update
 # Install apt-utils
 RUN apt-get -y install apt-utils
 
-
 # Install MySQL client
 RUN apt-get -y install mariadb-client
 
@@ -15,14 +14,11 @@ RUN apt-get -y install mariadb-client
 RUN apt-get -y install snmp
 
 # Install dependencies for RMON
-RUN apt-get -y install procps
-RUN apt-get -y install gcc
-RUN apt-get -y install tcpdump
-RUN apt-get -y install libpcap-dev
-RUN apt-get -y install python-libpcap
-
 RUN apt-get -y install python
 RUN apt-get -y install python-pip
+
+RUN apt-get -y install libpcap-dev
+RUN apt-get -y install python-libpcap
 RUN apt-get -y install python-mysqldb
 
 

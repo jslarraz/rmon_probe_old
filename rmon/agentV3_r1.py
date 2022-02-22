@@ -174,7 +174,6 @@ class agent_v3:
             #Get SysUpTime to test if it is working
             aux = subprocess.check_output(["snmpget", "-v", "1", "-c", COMMUNITY, "-Oben", HOST, "1.3.6.1.2.1.1.3.0"])
 
-            import rmon.tools.tools
             return tools.SNMP_proxy(HOST, COMMUNITY)
 
         except:
@@ -685,9 +684,9 @@ class SetCommandResponder (cmdrsp.SetCommandResponder):
 
 
 if __name__ == "__main__":
-    try:
-        os.system("snmpd")
-    except:
-        pass
+    # try:
+    #     os.system("snmpd")
+    # except:
+    #     pass
     local_agent_v3 = agent_v3("config.json")
 

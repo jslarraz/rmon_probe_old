@@ -24,7 +24,7 @@ user = {
 
 
 # Create the requests engine
-#eng = snmp_engine('3', user, '192.168.1.200', 161)
+# eng = snmp_engine('3', user, ip_addr, port)
 eng = snmp_engine('1', community, ip_addr, port)
 
 #################################
